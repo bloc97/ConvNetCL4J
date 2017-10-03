@@ -30,9 +30,9 @@ public class ForwardSpatialSingleDepthWiseConvolutionKernel extends Kernel { //T
     private final int[] outputDim = new int[3]; //Width, Width * Height, Total Length
     
     public void setLayer(float[] layer, int w, int h, int n, int shorz, int svert, int phorz, int pvert) {
-        if (layer.length != w * h * d * n + n) {
-            throw new IllegalArgumentException("Wrong layer or specified size.");
-        }
+        //if (layer.length != w * h * d * n + n) {
+            //throw new IllegalArgumentException("Wrong layer or specified size.");
+        //}
         this.layer = layer;
         kernelSize[0] = w;
         kernelSize[1] = h;
