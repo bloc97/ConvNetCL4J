@@ -78,13 +78,17 @@ public class BackwardSpatialConvolutionKernel extends Kernel {
         return inputError;
     }
     
+    public int[] getInputErrorSize() {
+        return inputErrorSize;
+    }
+    
     public float[] backward() {
         Range range = Range.create3D(inputErrorSize[0], inputErrorSize[1], inputErrorSize[2]);
         execute(range);
         return inputError;
     }
     
-    public float getOutputError(int i, int j, int k, int wi, int wj, int wn) {
+    private float getOutputError(int i, int j, int k, int wi, int wj, int wn) {
         
         int i_rel = i - wi + padding[0];
         int j_rel = j - wj + padding[1];
@@ -95,7 +99,18 @@ public class BackwardSpatialConvolutionKernel extends Kernel {
         return 0;
     }
     
-    public float getFromOutputError(int i, int j, int k) {
+    private float getFromWeight(int wi, int wj, int wk, int wn) {
+        
+        if (wi < 0 || wj < 0 || wk < 0 || wn < 0) {
+            return 0;
+        } else if (wi >= kernelSize[0] || wj >= kernelSize[1] || wk >= kernelSize[2] || wn >= kernelSize[3]) {
+            return 0;
+        }
+        
+        return weights[wn * kernelSize[2] + wk * kernelDim[1] + wj * kernelDim[0] + wi];
+    }
+    
+    private float getFromOutputError(int i, int j, int k) {
         
         if (i < 0 || j < 0) {
             return 0;
@@ -104,14 +119,6 @@ public class BackwardSpatialConvolutionKernel extends Kernel {
         }
         
         return outputError[k * outputErrorDim[1] + j * outputErrorDim[0] + i];
-    }
-    
-    public float getFromLayer(int i, int j, int k, int n) {
-        return weights[n * kernelDim[2] + k * kernelDim[1] + j * kernelDim[0] + i];
-    }
-    
-    public float getBiasFromLayer(int n) {
-        return weights[(n + 1) * kernelDim[2] - 1];
     }
     
     @Override
@@ -127,7 +134,7 @@ public class BackwardSpatialConvolutionKernel extends Kernel {
         for (int wi = 0; wi < kernelSize[0]; wi++) {
             for (int wj = 0; wj < kernelSize[1]; wj++) {
                 for (int wn = 0; wn < kernelSize[3]; wn++) {
-                    inputError[inputErrorIndex] = inputError[inputErrorIndex] + getOutputError(i, j, k, wi, wj, wn);
+                    inputError[inputErrorIndex] = inputError[inputErrorIndex] + getOutputError(i, j, k, wi, wj, wn) * getFromWeight(wi, wj, k, wn);
                 }
             }
         }

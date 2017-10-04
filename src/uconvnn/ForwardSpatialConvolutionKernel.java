@@ -78,13 +78,17 @@ public class ForwardSpatialConvolutionKernel extends Kernel { //Sums the result 
         return output;
     }
     
+    public int[] getOutputSize() {
+        return outputSize;
+    }
+    
     public float[] forward() {
         Range range = Range.create3D(outputSize[0], outputSize[1], outputSize[2]);
         execute(range);
         return output;
     }
     
-    public float getFromInput(int i, int j, int k) {
+    private float getFromInput(int i, int j, int k) {
         i = i - padding[0];
         j = j - padding[1];
         
@@ -97,11 +101,11 @@ public class ForwardSpatialConvolutionKernel extends Kernel { //Sums the result 
         return input[k * inputDim[1] + j * inputDim[0] + i];
     }
     
-    public float getFromLayer(int i, int j, int k, int n) {
+    private float getFromLayer(int i, int j, int k, int n) {
         return weights[n * kernelDim[2] + k * kernelDim[1] + j * kernelDim[0] + i];
     }
     
-    public float getBiasFromLayer(int n) {
+    private float getBiasFromLayer(int n) {
         return weights[(n + 1) * kernelDim[2] - 1];
     }
     
