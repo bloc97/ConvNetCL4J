@@ -119,17 +119,6 @@ public class UpdateSpatialConvolutionKernel extends Kernel {
         weights[(n + 1) * kernelDim[2] - 1] = value;
     }
     
-    private float getOutputError(int i, int j, int k, int wi, int wj, int wn) {
-        
-        int i_rel = i - wi + padding[0];
-        int j_rel = j - wj + padding[1];
-        
-        if (i_rel % stride[0] == 0 && j_rel % stride[1] == 0) {
-            return getFromOutputError(i_rel / stride[0], j_rel / stride[1], wn);
-        }
-        return 0;
-    }
-    
     private float getFromInput(int i, int j, int k) {
         i = i - padding[0];
         j = j - padding[1];

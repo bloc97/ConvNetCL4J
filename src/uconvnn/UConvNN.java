@@ -36,7 +36,7 @@ public class UConvNN {
         kernel.setLayer(layer, layerSize, layerSize, 1, 1, 1, 1, 1, 1);
         kernel.setInput(input, 3, 3, 1);
         
-        float[] expectedOutput = new float[] {0.2f,0.5f,0.1f,0.4f,0.9f,0.5f,0.7f,0.6f,0.0f};
+        float[] expectedOutput = new float[] {0.9f,0.5f,0.0f,0.4f,0.1f,0.7f,0.7f,0.6f,0.5f};
         float[] output = kernel.forward();
         float[] error = new float[output.length];
         
@@ -68,7 +68,7 @@ public class UConvNN {
             }
             
             ukernel.setOutputError(error, 3, 3, 1);
-            ukernel.update(0.01f);
+            ukernel.update(0.1f);
             System.out.println(Arrays.toString(error));
         }
         
