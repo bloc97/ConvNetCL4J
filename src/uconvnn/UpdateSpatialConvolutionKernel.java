@@ -162,7 +162,7 @@ public class UpdateSpatialConvolutionKernel extends Kernel {
             }
         }
         
-        grad = grad / (outputErrorSize[0] * outputErrorSize[1]);
+        //grad = grad / (outputErrorSize[0] * outputErrorSize[1]);
         
         setWeight(i, j, k, n, getWeight(i, j, k, n) + grad);
         
@@ -177,7 +177,7 @@ public class UpdateSpatialConvolutionKernel extends Kernel {
                     grad = grad + (prop[0] * getFromOutputError(oi, oj, n));
                 }
             }
-            grad = grad / (outputErrorSize[0] * outputErrorSize[1]);
+            //grad = grad / (outputErrorSize[0] * outputErrorSize[1]);
             setBiasInLayer(n, getBiasInLayer(n) + grad);
         }
         

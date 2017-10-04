@@ -68,7 +68,7 @@ public class UConvNN {
             }
             
             ukernel.setOutputError(error, 3, 3, 1);
-            ukernel.update(0.1f);
+            ukernel.update(0.05f);
             System.out.println(Arrays.toString(error));
         }
         
