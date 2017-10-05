@@ -5,8 +5,8 @@
  */
 package uconvnn;
 
-import com.aparapi.Kernel;
-import com.aparapi.Range;
+import com.aparapi.device.Device;
+import com.aparapi.device.OpenCLDevice;
 import java.util.Arrays;
 
 /**
@@ -19,6 +19,11 @@ public class UConvNN {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        
+        System.out.println(OpenCLDevice.listDevices(Device.TYPE.GPU));
+        System.out.println(OpenCLDevice.listDevices(Device.TYPE.CPU));
+        
         
         ForwardSpatialConvolutionKernel kernel = new ForwardSpatialConvolutionKernel();
         BackwardSpatialConvolutionKernel bkernel = new BackwardSpatialConvolutionKernel();
@@ -69,7 +74,8 @@ public class UConvNN {
             
             ukernel.setOutputError(error, 3, 3, 1);
             ukernel.update(0.05f);
-            System.out.println(Arrays.toString(error));
+            System.out.println(meanSquaredError(output, expectedOutput));
+            //System.out.println(Arrays.toString(error));
         }
         
         
@@ -83,5 +89,23 @@ public class UConvNN {
         }*/
         
     }
+    
+    public static float meanSquaredError(float[] output, float[] expected) {
+        
+        if (output.length != expected.length) {
+            throw new IllegalArgumentException("Different array lengths.");
+        }
+        
+        float error = 0;
+        
+        for (int i=0; i<output.length; i++) {
+            float diff = output[i] - expected[i];
+            error += diff * diff;
+        }
+        error /= output.length;
+        
+        return error;
+    }
+    
     
 }
