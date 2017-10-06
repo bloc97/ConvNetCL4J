@@ -25,20 +25,18 @@ public class UConvNN {
         System.out.println(OpenCLDevice.listDevices(Device.TYPE.CPU));
         
         
-        ForwardSpatialConvolutionKernel kernel = new ForwardSpatialConvolutionKernel();
-        BackwardSpatialConvolutionKernel bkernel = new BackwardSpatialConvolutionKernel();
-        UpdateSpatialConvolutionKernel ukernel = new UpdateSpatialConvolutionKernel();
+        SpatialConvolutionKernel kernel = new SpatialConvolutionKernel();
         
         int layerSize = 3;
         
-        float[] layer = new float[10];
+        float[] weights = new float[10];
         
-        for (int i=0; i<layer.length; i++) {
-            layer[i] = (float)(Math.random() * 2d - 1);
+        for (int i=0; i<weights.length; i++) {
+            weights[i] = (float)(Math.random() * 2d - 1);
         }
         
         float[] input = new float[] {0.2f,0.5f,0.1f,0.4f,0.9f,0.5f,0.7f,0.6f,0.0f};
-        kernel.setLayer(layer, layerSize, layerSize, 1, 1, 1, 1, 1, 1);
+        kernel.setWeight(weights, layerSize, layerSize, 1, 1, 1, 1, 1, 1);
         kernel.setInput(input, 3, 3, 1);
         
         float[] expectedOutput = new float[] {0.9f,0.5f,0.0f,0.4f,0.1f,0.7f,0.7f,0.6f,0.5f};
@@ -55,12 +53,8 @@ public class UConvNN {
         System.out.println(Arrays.toString(output));
         System.out.println(Arrays.toString(error));
         
-        bkernel.setLayer(layer, layerSize, layerSize, 1, 1, 1, 1, 1, 1);
-        bkernel.setOutputError(error, kernel.getOutputSize()[0], kernel.getOutputSize()[1], kernel.getOutputSize()[2]);
-        float[] inputError = bkernel.backward();
-        
-        ukernel.setLayer(layer, layerSize, layerSize, 1, 1, 1, 1, 1, 1);
-        ukernel.setInput(input, 3, 3, 1);
+        kernel.setOutputError(error);
+        float[] inputError = kernel.backward();
         
         for (int i=0; i<100000; i++) {
             output = kernel.forward();
@@ -72,8 +66,13 @@ public class UConvNN {
                 error[e] = diff;
             }
             
-            ukernel.setOutputError(error, 3, 3, 1);
-            ukernel.update(0.05f);
+            kernel.setOutputError(error);
+            float[] grad = kernel.grad(0.05f);
+            
+            for (int g=0; g<grad.length; g++) {
+                weights[g] = weights[g] + grad[g];
+            }
+            
             System.out.println(meanSquaredError(output, expectedOutput));
             //System.out.println(Arrays.toString(error));
         }

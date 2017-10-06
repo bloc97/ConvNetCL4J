@@ -12,8 +12,8 @@ package uconvnn;
 public interface CostFunction {
     
     public float getError(float[] observed, float[] expected);
-    public float getErrorDerivativeRespectToOutput(float observed, float expected);
-    public float[] getErrorArray(float[] observed, float[] expected);
+    public float getErrorDerivative(float observed, float expected);
+    public float[] getErrorDerivativeArray(float[] observed, float[] expected);
     
     public float getBatchError(float[][] observedBatch, float[][] expectedBatch);
     

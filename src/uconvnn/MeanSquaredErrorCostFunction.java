@@ -26,18 +26,18 @@ public class MeanSquaredErrorCostFunction implements CostFunction {
     }
 
     @Override
-    public float getErrorDerivativeRespectToOutput(float observed, float expected) {
+    public float getErrorDerivative(float observed, float expected) {
         return expected - observed;
     }
 
     @Override
-    public float[] getErrorArray(float[] observed, float[] expected) {
+    public float[] getErrorDerivativeArray(float[] observed, float[] expected) {
         if (observed.length != expected.length || observed.length == 0) {
             throw new IllegalArgumentException("Wrong array size.");
         }
         float[] error = new float[observed.length];
         for (int i=0; i<observed.length; i++) {
-            error[i] = getErrorDerivativeRespectToOutput(observed[i], expected[i]);
+            error[i] = getErrorDerivative(observed[i], expected[i]);
         }
         return error;
     }
