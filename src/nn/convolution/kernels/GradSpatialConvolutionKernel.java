@@ -7,6 +7,7 @@ package nn.convolution.kernels;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
+import com.aparapi.device.Device;
 
 /**
  *
