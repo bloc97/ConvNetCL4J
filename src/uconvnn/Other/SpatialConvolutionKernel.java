@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uconvnn;
+package uconvnn.Other;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
@@ -162,10 +162,10 @@ public class SpatialConvolutionKernel extends Kernel { //Sums the result of kern
     }
     
     
-    private float getOutputErrorFromInputAndWeights(int ii, int ij, int ik, int wi, int wj, int wn) {
+    private float getOutputErrorFromInputAndWeights(int i, int j, int k, int wi, int wj, int wn) {
         
-        int i_rel = ii - wi + padding[0];
-        int j_rel = ij - wj + padding[1];
+        int i_rel = i - wi + padding[0];
+        int j_rel = j - wj + padding[1];
         
         if ((i_rel % stride[0]) == 0 && (j_rel % stride[1]) == 0) {
             return getOutputError(i_rel / stride[0], j_rel / stride[1], wn);
@@ -201,84 +201,8 @@ public class SpatialConvolutionKernel extends Kernel { //Sums the result of kern
         return gradients;
     }
     
-    private void step2() {
-        int i = getGlobalId(0); //Input Volume i,j,k
-        int j = getGlobalId(1);
-        int k = getGlobalId(2);
-
-        int inputErrorIndex = k * inputDim[1] + j * inputDim[0] + i;
-
-        inputError[inputErrorIndex] = 0;
-
-        for (int wi = 0; wi < kernelSize[0]; wi++) {
-            for (int wj = 0; wj < kernelSize[1]; wj++) {
-                for (int wn = 0; wn < kernelSize[3]; wn++) {
-                    inputError[inputErrorIndex] = inputError[inputErrorIndex] + getOutputErrorFromInputAndWeights(i, j, k, wi, wj, wn) * getWeight(wi, wj, k, wn);
-                }
-            }
-        }
-        
-    }
-    
     @Override
     public void run() {
-        int i, j, n, k = 0;
-        if (step[0] == 0) {
-            i = getGlobalId(0); //Output Volume i,j,n
-            j = getGlobalId(1);
-            n = getGlobalId(2);
-
-            int outputIndex = n * outputDim[1] + j * outputDim[0] + i;
-
-            int inputPosi = i * stride[0];
-            int inputPosj = j * stride[1];
-
-            output[outputIndex] = 0;
-
-            for (int ii = 0; ii < kernelSize[0]; ii++) {
-                for (int ij = 0; ij < kernelSize[1]; ij++) {
-                    for (int ik = 0; ik < kernelSize[2]; ik++) {
-                        output[outputIndex] = output[outputIndex] + (getInput(ii + inputPosi, ij + inputPosj, ik) * getWeight(ii, ij, ik, n));
-                    }
-                }
-            }
-
-            output[outputIndex] = output[outputIndex] + getBiasWeight(n);
-        } else if (step[0] == 1) {
-            step2();
-        } /*else if (step[0] == 2) {
-            i = getGlobalId(0); //Kernel Volume i,j,k,n
-            j = getGlobalId(1);
-            k = getGlobalId(2) % kernelSize[2];
-            n =(getGlobalId(2) - k) % kernelSize[2];
-
-            float grad = 0;
-
-            for (int oi = 0; oi < outputSize[0]; oi++) {
-                for (int oj = 0; oj < outputSize[1]; oj++) {
-                    int inputPosi = oi * stride[0] + i;
-                    int inputPosj = oj * stride[1] + j;
-
-                    grad = grad + (getInput(inputPosi, inputPosj, k) * getOutputError(oi, oj, n));
-                }
-            }
-            grad = grad * prop[0];
-            grad = grad / (outputSize[0] * outputSize[1]);
-            //addGradient(i, j, k, n, grad);
-        } else if (step[0] == 3) {
-            n = getGlobalId(0); //Kernel Bias n
-            
-            float grad = 0;
-            
-            for (int oi = 0; oi < outputSize[0]; oi++) {
-                for (int oj = 0; oj < outputSize[1]; oj++) {
-                    grad = grad + (getOutputError(oi, oj, n));
-                }
-            }
-            grad = grad * prop[0];
-            grad = grad / (outputSize[0] * outputSize[1]);
-            addBiasGradient(n, grad);
-        }*/
     }
     
 }

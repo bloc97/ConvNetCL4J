@@ -5,6 +5,9 @@
  */
 package uconvnn;
 
+import loss.MeanSquaredErrorLossFunction;
+import loss.LossFunction;
+import uconvnn.convolution.spatial.SpatialConvolutionLayer;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
 import java.util.Arrays;
@@ -24,56 +27,71 @@ public class UConvNN {
         System.out.println(OpenCLDevice.listDevices(Device.TYPE.GPU));
         System.out.println(OpenCLDevice.listDevices(Device.TYPE.CPU));
         
-        
-        SpatialConvolutionKernel kernel = new SpatialConvolutionKernel();
-        
         int layerSize = 3;
         
-        float[] weights = new float[10];
+        SpatialConvolutionLayer layer = new SpatialConvolutionLayer(layerSize, layerSize, 1, 1, 1, 1, 1, 1);
+        
+        
+        float[] weights = layer.getWeights();
         
         for (int i=0; i<weights.length; i++) {
             weights[i] = (float)(Math.random() * 2d - 1);
         }
         
-        float[] input = new float[] {0.2f,0.5f,0.1f,0.4f,0.9f,0.5f,0.7f,0.6f,0.0f};
-        kernel.setWeight(weights, layerSize, layerSize, 1, 1, 1, 1, 1, 1);
-        kernel.setInput(input, 3, 3, 1);
+        float[] input1 = new float[] {0.2f,0.5f,0.1f,0.4f,0.9f,0.5f,0.7f,0.6f,0.0f};
+        float[] expectedOutput1 = new float[] {0.9f,0.5f,0.0f,0.4f,0.1f,0.7f,0.7f,0.6f,0.5f};
+        float[] input2 = new float[] {0.2f,-0.5f,0.5f,0.3f,0.2f,-0.4f,0.5f,0.6f,0.0f};
+        float[] expectedOutput2 = new float[] {-0.5f,0.52f,0.2f,0.4f,0.6f,0.5f,0.1f,0.3f,0.4f};
+        float[] input3 = new float[] {-0.5f,0.1f,0.3f,0.2f,0.7f,-0.2f,-0.4f,0.4f,0.1f};
+        float[] expectedOutput3 = new float[] {0.2f,0.0f,0.4f,0.9f,0.7f,0.3f,-0.5f,-0.6f,0.0f};
         
-        float[] expectedOutput = new float[] {0.9f,0.5f,0.0f,0.4f,0.1f,0.7f,0.7f,0.6f,0.5f};
-        float[] output = kernel.forward();
+        
+        layer.setInputSize(3, 3, 1);
+        
+        float[] output = layer.forward(input1);
         float[] error = new float[output.length];
         
         for (int i=0; i<output.length; i++) {
-            float diff = expectedOutput[i] - output[i];
+            float diff = expectedOutput1[i] - output[i];
             error[i] = diff;
         }
         
-        System.out.println(Arrays.toString(input));
-        System.out.println(Arrays.toString(expectedOutput));
+        LossFunction lossFunction = new MeanSquaredErrorLossFunction();
+        
+        System.out.println(Arrays.toString(input1));
+        System.out.println(Arrays.toString(expectedOutput1));
         System.out.println(Arrays.toString(output));
         System.out.println(Arrays.toString(error));
         
-        kernel.setOutputError(error);
-        float[] inputError = kernel.backward();
+        float[] inputError = layer.backward(error);
         
         for (int i=0; i<100000; i++) {
-            output = kernel.forward();
-            error = new float[output.length];
+            output = layer.forward(input1);
+            error = lossFunction.getErrorDerivativeArray(output, expectedOutput1);
+            inputError = layer.backward(error);
+            layer.grad();
+            System.out.println(meanSquaredError(output, expectedOutput1));
             
+            output = layer.forward(input2);
+            error = lossFunction.getErrorDerivativeArray(output, expectedOutput2);
+            inputError = layer.backward(error);
+            layer.grad();
+            System.out.println(meanSquaredError(output, expectedOutput2));
             
-            for (int e=0; e<output.length; e++) {
-                float diff = expectedOutput[e] - output[e];
-                error[e] = diff;
-            }
+            output = layer.forward(input3);
+            error = lossFunction.getErrorDerivativeArray(output, expectedOutput3);
+            inputError = layer.backward(error);
+            layer.grad();
+            System.out.println(meanSquaredError(output, expectedOutput3));
             
-            kernel.setOutputError(error);
-            float[] grad = kernel.grad(0.05f);
+            float[] grad = layer.getGradients();
             
             for (int g=0; g<grad.length; g++) {
-                weights[g] = weights[g] + grad[g];
+                weights[g] += grad[g] / 3 * 0.05f;
             }
-            
-            System.out.println(meanSquaredError(output, expectedOutput));
+            layer.resetGradients();
+            //System.out.println(Arrays.toString(inputError));
+            //System.out.println(Arrays.toString(grad));
             //System.out.println(Arrays.toString(error));
         }
         

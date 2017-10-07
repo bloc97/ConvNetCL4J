@@ -11,15 +11,46 @@ package uconvnn;
  */
 public interface Layer {
     
+    /**
+     * Forward pass
+     * @param input Input data
+     * @return Output data
+     */
     public float[] forward(float[] input);
-    public float[] backward(float[] error);
     
     /**
-     * @return Reference to the weights array of the layer.
+     * Back-propagation pass
+     * @param outputError Output error
+     * @return Input error
+     */
+    public float[] backward(float[] outputError);
+    
+    /**
+     * Computes the gradient with respect to the last backward pass <br>
+     * Note, this function does <br> oldGrad = oldGrad + newGrad <br><br>
+     * To clear the gradient, use {@link resetGradients()}
+     * @return Gradient array
+     */
+    public float[] grad();
+    
+    /**
+     * @return Reference to the weight array of the layer.
      */
     public float[] getWeights();
     
-    public int dimensions();
-    public int[] getDimensionSizes();
+    /**
+     * @return Reference to the weight gradient array of the layer.
+     */
+    public float[] getGradients();
+    
+    /**
+     * @return Weight size of the layer as a n-dimensional vector in array form.
+     */
+    public int[] getWeightSize();
+    
+    /**
+     * Resets the gradient array to 0;
+     */
+    public void resetGradients();
     
 }

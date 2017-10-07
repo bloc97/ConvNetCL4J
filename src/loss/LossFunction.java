@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uconvnn;
+package loss;
 
 /**
  *
  * @author bowen
  */
-public interface CostFunction {
+public interface LossFunction {
     
     public float getError(float[] observed, float[] expected);
     public float getErrorDerivative(float observed, float expected);
