@@ -87,35 +87,6 @@ public class GradSpatialConvolutionKernel extends Kernel {
         gradients[index] = gradients[index] + value;
     
     }
-        
-    private float getWeight(int wi, int wj, int wk, int wn) {
-        
-        if (wi < 0 || wj < 0 || wk < 0 || wn < 0) {
-            return 0;
-        } else if (wi >= kernelSize[0] || wj >= kernelSize[1] || wk >= kernelSize[2] || wn >= kernelSize[3]) {
-            return 0;
-        }
-        
-        return weights[wn * kernelDim[2] + wk * kernelDim[1] + wj * kernelDim[0] + wi];
-    }
-    private void setWeight(int wi, int wj, int wk, int wn, float value) {
-        
-        if (wi < 0 || wj < 0 || wk < 0 || wn < 0) {
-            return;
-        } else if (wi >= kernelSize[0] || wj >= kernelSize[1] || wk >= kernelSize[2] || wn >= kernelSize[3]) {
-            return;
-        }
-        
-        weights[wn * kernelDim[2] + wk * kernelDim[1] + wj * kernelDim[0] + wi] = value;
-    }
-    
-    private float getBiasInLayer(int n) {
-        return weights[(n + 1) * kernelDim[2] - 1];
-    }
-    
-    private void setBiasInLayer(int n, float value) {
-        weights[(n + 1) * kernelDim[2] - 1] = value;
-    }
     
     @Override
     public void run() {

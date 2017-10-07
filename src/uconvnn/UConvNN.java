@@ -70,19 +70,19 @@ public class UConvNN {
             error = lossFunction.getErrorDerivativeArray(output, expectedOutput1);
             inputError = layer.backward(error);
             layer.grad();
-            System.out.println(meanSquaredError(output, expectedOutput1));
+            System.out.println(lossFunction.getError(output, expectedOutput1));
             
             output = layer.forward(input2);
             error = lossFunction.getErrorDerivativeArray(output, expectedOutput2);
             inputError = layer.backward(error);
             layer.grad();
-            System.out.println(meanSquaredError(output, expectedOutput2));
+            System.out.println(lossFunction.getError(output, expectedOutput2));
             
             output = layer.forward(input3);
             error = lossFunction.getErrorDerivativeArray(output, expectedOutput3);
             inputError = layer.backward(error);
             layer.grad();
-            System.out.println(meanSquaredError(output, expectedOutput3));
+            System.out.println(lossFunction.getError(output, expectedOutput3));
             
             float[] grad = layer.getGradients();
             
@@ -96,33 +96,8 @@ public class UConvNN {
         }
         
         
-        /*
-        //System.out.println(kernel.getFromLayer(1,0,0,1));
-        while(true) {
-            long s = System.currentTimeMillis();
-            kernel.forward();
-            //System.out.println(Arrays.toString(kernel.getOutput()));
-            System.out.println(System.currentTimeMillis() - s);
-        }*/
-        
     }
     
-    public static float meanSquaredError(float[] output, float[] expected) {
-        
-        if (output.length != expected.length) {
-            throw new IllegalArgumentException("Different array lengths.");
-        }
-        
-        float error = 0;
-        
-        for (int i=0; i<output.length; i++) {
-            float diff = output[i] - expected[i];
-            error += diff * diff;
-        }
-        error /= output.length;
-        
-        return error;
-    }
     
     
 }
