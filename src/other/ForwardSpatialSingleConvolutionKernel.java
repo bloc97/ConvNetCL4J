@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uconvnn.Other;
+package other;
 
 import com.aparapi.Kernel;
 

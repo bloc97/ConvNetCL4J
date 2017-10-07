@@ -3,16 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uconvnn.convolution.spatial;
+package nn.convolution;
 
-import uconvnn.Layer;
-import uconvnn.convolution.spatial.ForwardSpatialConvolutionKernel;
+import nn.convolution.kernels.BackwardSpatialConvolutionKernel;
+import nn.convolution.kernels.GradSpatialConvolutionKernel;
+import nn.convolution.kernels.ForwardSpatialConvolutionKernel;
+import nn.NeuronLayer;
 
 /**
  *
  * @author bowen
  */
-public class SpatialConvolutionLayer implements Layer {
+public class SpatialConvolutionLayer implements NeuronLayer {
     
     public final static ForwardSpatialConvolutionKernel FORWARDKERNEL = new ForwardSpatialConvolutionKernel();
     public final static BackwardSpatialConvolutionKernel BACKWARDKERNEL = new BackwardSpatialConvolutionKernel();
@@ -37,7 +39,7 @@ public class SpatialConvolutionLayer implements Layer {
     private final int[] outputSize = new int[3];
     private final int[] outputDim = new int[3]; //Width, Width * Height, Total Length
     
-    public SpatialConvolutionLayer(int w, int h , int d, int n, int shorz, int svert, int phorz, int pvert) { //Allow non-odd kernels and individual side padding
+    public SpatialConvolutionLayer(int w, int h , int d, int n, int shorz, int svert, int phorz, int pvert) { //TODO: Allow non-odd kernels and individual side padding
 
         int length = w * h * d * n + n;
         this.weights = new float[length];
@@ -58,9 +60,17 @@ public class SpatialConvolutionLayer implements Layer {
         padding[1] = pvert;
     }
     
-    public void setInputSize(int w, int h, int d) {
+    @Override
+    public void setInputSize(int[] size) {
+        if (size.length != 3) {
+            throw new IllegalArgumentException("Wrong input dimension.");
+        }
+        int w = size[0];
+        int h = size[1];
+        int d = size[2];
+        
         if (d != kernelSize[2]) {
-            throw new IllegalArgumentException("Wrong input or specified size.");
+            throw new IllegalArgumentException("Wrong input depth.");
         }
         int length = w * h * d;
         input = new float[length];
@@ -84,9 +94,11 @@ public class SpatialConvolutionLayer implements Layer {
         outputError = new float[outputDim[2]];
     }
     
+    @Override
     public int[] getInputSize() {
         return inputSize;
     }
+    @Override
     public int[] getOutputSize() {
         return outputSize;
     }
@@ -139,11 +151,9 @@ public class SpatialConvolutionLayer implements Layer {
     }
 
     @Override
-    public float[] grad() {
+    public void grad() {
         
         GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, input, inputSize, inputDim, outputError, outputSize, outputDim);
-        
-        return gradients;
     }
 
     

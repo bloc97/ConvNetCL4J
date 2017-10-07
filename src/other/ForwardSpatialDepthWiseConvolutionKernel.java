@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uconvnn.Other;
+package other;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
@@ -12,11 +12,11 @@ import com.aparapi.Range;
  *
  * @author bowen
  */
-public class ForwardSpatialSingleDepthWiseConvolutionKernel extends Kernel { //Treats each depth of the kernel as individual convolutions, while using a 2D kernel without depth
+public class ForwardSpatialDepthWiseConvolutionKernel extends Kernel { //Treats each depth of the kernel as individual convolutions
     
     private float[] layer = new float[0];
-    private final int[] kernelSize = new int[3]; //Width, Height, Depth, Number
-    private final int[] kernelDim = new int[3]; //Width, Width * Height, Width * Height * Depth, Total Length
+    private final int[] kernelSize = new int[4]; //Width, Height, Depth, Number
+    private final int[] kernelDim = new int[4]; //Width, Width * Height, Width * Height * Depth, Total Length
     
     private final int[] stride = new int[2]; //Stride: Horizontal, Vertical
     private final int[] padding = new int[2]; //Padding: Horizontal, Vertical
@@ -29,19 +29,20 @@ public class ForwardSpatialSingleDepthWiseConvolutionKernel extends Kernel { //T
     private final int[] outputSize = new int[3];
     private final int[] outputDim = new int[3]; //Width, Width * Height, Total Length
     
-    public void setLayer(float[] layer, int w, int h, int n, int shorz, int svert, int phorz, int pvert) {
-        //if (layer.length != w * h * d * n + n) {
-            //throw new IllegalArgumentException("Wrong layer or specified size.");
-        //}
+    public void setLayer(float[] layer, int w, int h , int d, int n, int shorz, int svert, int phorz, int pvert) {
+        if (layer.length != w * h * d * n + n) {
+            throw new IllegalArgumentException("Wrong layer or specified size.");
+        }
         this.layer = layer;
         kernelSize[0] = w;
         kernelSize[1] = h;
+        kernelSize[2] = d;
         kernelSize[3] = n;
         
         kernelDim[0] = w;
         kernelDim[1] = w * h;
-        kernelDim[2] = w * h + 1; //1 array entry for bias
-        kernelDim[3] = w * h * n + n; //n array entries for biases
+        kernelDim[2] = w * h * d + 1; //1 array entry for bias
+        kernelDim[3] = w * h * d * n + n; //n array entries for biases
         
         stride[0] = shorz;
         stride[1] = svert;

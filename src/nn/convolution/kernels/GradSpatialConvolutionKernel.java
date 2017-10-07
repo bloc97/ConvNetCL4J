@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uconvnn.convolution.spatial;
+package nn.convolution.kernels;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;

@@ -3,12 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package optim;
+package nn.elementwise.activation;
+
+import nn.Layer;
 
 /**
  *
  * @author bowen
  */
-public class SGD {
+public interface NonLinearActivationLayer extends Layer {
+    
+    public float equation(float x);
+    public float derivative(float x);
     
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package uconvnn;
+package nn;
 
 import java.util.Random;
 
@@ -13,26 +13,26 @@ import java.util.Random;
  */
 public abstract class Randomiser {
     
-    public static void uniform(Layer layer, float mean, float multiplier, Random random) {
+    public static void uniform(NeuronLayer layer, float mean, float multiplier, Random random) {
         float[] weights = layer.getWeights();
         
         for (int i=0; i<weights.length; i++) {
             weights[i] = (random.nextFloat() * multiplier + mean); 
         }
     }
-    public static void uniform(Layer layer, float mean, float multiplier) {
+    public static void uniform(NeuronLayer layer, float mean, float multiplier) {
         Random random = new Random();
         uniform(layer, mean, multiplier, random);
     }
     
-    public static void normal(Layer layer, float mean, float multiplier, Random random) {
+    public static void normal(NeuronLayer layer, float mean, float multiplier, Random random) {
         float[] weights = layer.getWeights();
         
         for (int i=0; i<weights.length; i++) {
             weights[i] = (float)(random.nextGaussian() * multiplier + mean); 
         }
     }
-    public static void normal(Layer layer, float mean, float multiplier) {
+    public static void normal(NeuronLayer layer, float mean, float multiplier) {
         Random random = new Random();
         normal(layer, mean, multiplier, random);
     }
