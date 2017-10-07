@@ -156,5 +156,15 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, input, inputSize, inputDim, outputError, outputSize, outputDim);
     }
 
+    @Override
+    public int getFanIn() {
+        return kernelSize[0] * kernelSize[1] * kernelSize[2];
+    }
+
+    @Override
+    public int getFanOut() {
+        return kernelSize[0] * kernelSize[1] * kernelSize[3];
+    }
+
     
 }

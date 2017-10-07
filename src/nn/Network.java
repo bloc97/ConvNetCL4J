@@ -29,6 +29,10 @@ public class Network implements Layer, Gradable {
         return layers;
     }
     
+    public void addLayer(Layer layer) {
+        this.layers.add(layer);
+    }
+    
     @Override
     public float[] forward(float[] input) {
         float[] data = input;

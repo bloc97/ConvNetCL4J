@@ -54,9 +54,6 @@ public class GradSpatialConvolutionKernel extends Kernel {
     }
     
     private float getFromInput(int i, int j, int k) {
-        i = i - padding[0];
-        j = j - padding[1];
-        
         if (i < 0 || j < 0) {
             return 0;
         } else if (i >= inputSize[0] || j >= inputSize[1]) {
@@ -93,14 +90,14 @@ public class GradSpatialConvolutionKernel extends Kernel {
         int i = getGlobalId(0); //Kernel Volume i,j,k,n
         int j = getGlobalId(1);
         int k = getGlobalId(2) % kernelSize[2];
-        int n =(getGlobalId(2) - k) % kernelSize[2];
+        int n =(getGlobalId(2) - k) / kernelSize[2];
         
         float grad = 0;
         
         for (int oi = 0; oi < outputErrorSize[0]; oi++) {
             for (int oj = 0; oj < outputErrorSize[1]; oj++) {
-                int inputPosi = oi * stride[0] + i;
-                int inputPosj = oj * stride[1] + j;
+                int inputPosi = oi * stride[0] - padding[0] + i;
+                int inputPosj = oj * stride[1] - padding[1] + j;
                 
                 grad = grad + (getFromInput(inputPosi, inputPosj, k) * getFromOutputError(oi, oj, n));
             }

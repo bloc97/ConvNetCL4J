@@ -78,7 +78,7 @@ public class ReLULayer implements NonLinearActivationLayer {
             throw new IllegalArgumentException("Wrong output error array size.");
         }
         this.outputError = outputError;
-        BACKWARDKERNEL.call(outputError, inputError);
+        BACKWARDKERNEL.call(input, outputError, inputError);
         
         return inputError;
     }

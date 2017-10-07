@@ -68,7 +68,7 @@ public class BackwardSpatialConvolutionKernel extends Kernel {
             return 0;
         }
         
-        return weights[wn * kernelSize[2] + wk * kernelDim[1] + wj * kernelDim[0] + wi];
+        return weights[wn * kernelDim[2] + wk * kernelDim[1] + wj * kernelDim[0] + wi];
     }
     
     private float getOutputError(int i, int j, int k) {
@@ -95,7 +95,7 @@ public class BackwardSpatialConvolutionKernel extends Kernel {
         for (int wi = 0; wi < kernelSize[0]; wi++) {
             for (int wj = 0; wj < kernelSize[1]; wj++) {
                 for (int wn = 0; wn < kernelSize[3]; wn++) {
-                    inputError[inputErrorIndex] = inputError[inputErrorIndex] + getOutputErrorByInputAndWeight(i, j, k, wi, wj, wn) * getWeight(wi, wj, k, wn);
+                    inputError[inputErrorIndex] = inputError[inputErrorIndex] + (getOutputErrorByInputAndWeight(i, j, k, wi, wj, wn) * getWeight(wi, wj, k, wn));
                 }
             }
         }

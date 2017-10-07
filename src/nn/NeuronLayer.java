@@ -26,4 +26,7 @@ public interface NeuronLayer extends Layer, Gradable {
      */
     public int[] getWeightSize();
     
+    public int getFanIn();
+    public int getFanOut();
+    
 }

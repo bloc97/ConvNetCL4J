@@ -14,10 +14,12 @@ import com.aparapi.Range;
  */
 public class ReLUBackwardKernel extends Kernel {
 
+    private float[] input = new float[0];
     private float[] outputError = new float[0];
     private float[] inputError = new float[0];
 
-    public void call(float[] outputError, float[] inputError) {
+    public void call(float[] input, float[] outputError, float[] inputError) {
+        this.input = input;
         this.outputError = outputError;
         this.inputError = inputError;
         Range range = Range.create(outputError.length);
@@ -28,10 +30,10 @@ public class ReLUBackwardKernel extends Kernel {
     public void run() {
         int i = getGlobalId();
         
-        if (outputError[i] < 0) {
+        if (input[i] < 0) {
             inputError[i] = 0;
         } else {
-            inputError[i] = 1;
+            inputError[i] = outputError[i];
         }
     }
     

@@ -16,8 +16,10 @@ public abstract class Randomiser {
     public static void uniform(NeuronLayer layer, float mean, float multiplier, Random random) {
         float[] weights = layer.getWeights();
         
+        float min = -(multiplier) + mean;
+        
         for (int i=0; i<weights.length; i++) {
-            weights[i] = (random.nextFloat() * multiplier + mean); 
+            weights[i] = (random.nextFloat() * 2 * multiplier + min); 
         }
     }
     public static void uniform(NeuronLayer layer, float mean, float multiplier) {
