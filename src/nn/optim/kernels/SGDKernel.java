@@ -17,13 +17,14 @@ public class SGDKernel extends Kernel {
     private float[] weights = new float[0];
     private float[] gradients = new float[0];
     
-    private final float[] prop = new float[2];
+    private final float[] prop = new float[3];
     
-    public void call(float[] weights, float[] gradients, float learningRate, float clip) {
+    public void call(float[] weights, float[] gradients, int batchSize, float learningRate, float clip) {
         this.weights = weights;
         this.gradients = gradients;
         prop[0] = learningRate;
         prop[1] = clip;
+        prop[2] = batchSize;
         
         Range range = Range.create(weights.length);
         execute(range);
@@ -33,7 +34,7 @@ public class SGDKernel extends Kernel {
     public void run() {
         int i = getGlobalId();
         
-        float gradient = min(max(gradients[i], -prop[1]), prop[1]);
+        float gradient = min(max((gradients[i] / prop[2]), -prop[1]), prop[1]);
         
         weights[i] = weights[i] + (prop[0] * gradient);
     }

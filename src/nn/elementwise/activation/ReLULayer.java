@@ -20,6 +20,7 @@ public class ReLULayer implements NonLinearActivationLayer {
     private float[] input = new float[0];
     private float[] inputError = new float[0];
     private int inputSize[] = new int[0];
+    private int inputLength = 0;
     
     private float[] output = new float[0];
     private float[] outputError = new float[0];
@@ -49,6 +50,7 @@ public class ReLULayer implements NonLinearActivationLayer {
         
         output = new float[length];
         outputError = new float[length];
+        inputLength = length;
     }
 
     @Override
@@ -63,7 +65,7 @@ public class ReLULayer implements NonLinearActivationLayer {
 
     @Override
     public float[] forward(float[] input) {
-        if (input.length != this.input.length) {
+        if (input.length != inputLength) {
             throw new IllegalArgumentException("Wrong input array size.");
         }
         this.input = input;
@@ -74,7 +76,7 @@ public class ReLULayer implements NonLinearActivationLayer {
 
     @Override
     public float[] backward(float[] outputError) {
-        if (input.length != this.input.length) {
+        if (outputError.length != inputLength) {
             throw new IllegalArgumentException("Wrong output error array size.");
         }
         this.outputError = outputError;

@@ -19,14 +19,14 @@ public class SGD {
     
     public final static SGDKernel KERNEL = new SGDKernel();
     
-    public void update(Network network, float learningRate) {
-        update(network, learningRate, Float.MAX_VALUE);
+    public void update(Network network, int batchSize, float learningRate) {
+        update(network, batchSize, learningRate, Float.MAX_VALUE);
     }
-    public void update(Network network, float learningRate, float clip) {
+    public void update(Network network, int batchSize, float learningRate, float clip) {
         for (Layer layer : network.getLayers()) {
             if (layer instanceof NeuronLayer) {
                 NeuronLayer nlayer = (NeuronLayer) layer;
-                KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), learningRate, clip);
+                KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), batchSize, learningRate, clip);
                 nlayer.resetGradients();
             }
         }

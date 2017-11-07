@@ -49,9 +49,9 @@ public class GradSpatialConvolutionKernel extends Kernel {
         this.outputErrorDim = outputErrorDim;
         
         
-        Range range = Range.create3D(kernelSize[0], kernelSize[1], kernelSize[2] * kernelSize[3]);
+        Range range = Range.create3D(kernelSize[0], kernelSize[1], (kernelSize[2] + 1) * kernelSize[3]);
         execute(range);
-        updateBias();
+        //updateBias();
     }
     
     private float getFromInput(int i, int j, int k) {
@@ -90,23 +90,37 @@ public class GradSpatialConvolutionKernel extends Kernel {
     public void run() {
         int i = getGlobalId(0); //Kernel Volume i,j,k,n
         int j = getGlobalId(1);
-        int k = getGlobalId(2) % kernelSize[2];
-        int n =(getGlobalId(2) - k) / kernelSize[2];
+        int k = getGlobalId(2) % (kernelSize[2] + 1);
+        int n =(getGlobalId(2) - k) / (kernelSize[2] + 1);
         
         float grad = 0;
         
-        for (int oi = 0; oi < outputErrorSize[0]; oi++) {
-            for (int oj = 0; oj < outputErrorSize[1]; oj++) {
-                int inputPosi = oi * stride[0] - padding[0] + i;
-                int inputPosj = oj * stride[1] - padding[1] + j;
-                
-                grad = grad + (getFromInput(inputPosi, inputPosj, k) * getFromOutputError(oi, oj, n));
+        if (k == kernelSize[2]) {
+            
+            for (int oi = 0; oi < outputErrorSize[0]; oi++) {
+                for (int oj = 0; oj < outputErrorSize[1]; oj++) {
+                    grad = grad + (getFromOutputError(oi, oj, n));
+                }
             }
+            //grad = grad * prop[0];
+            grad = grad / (outputErrorSize[0] * outputErrorSize[1]);
+            //setBiasInLayer(n, getBiasInLayer(n) + grad);
+            addBiasGradient(n, grad);
+            
+        } else {
+            for (int oi = 0; oi < outputErrorSize[0]; oi++) {
+                for (int oj = 0; oj < outputErrorSize[1]; oj++) {
+                    int inputPosi = oi * stride[0] - padding[0] + i;
+                    int inputPosj = oj * stride[1] - padding[1] + j;
+
+                    grad = grad + (getFromInput(inputPosi, inputPosj, k) * getFromOutputError(oi, oj, n));
+                }
+            }
+            //grad = grad * prop[0];
+            grad = grad / (outputErrorSize[0] * outputErrorSize[1]);
+            //setWeight(i, j, k, n, getWeight(i, j, k, n) + grad);
+            addGradient(i, j, k, n, grad);
         }
-        //grad = grad * prop[0];
-        grad = grad / (outputErrorSize[0] * outputErrorSize[1]);
-        //setWeight(i, j, k, n, getWeight(i, j, k, n) + grad);
-        addGradient(i, j, k, n, grad);
     }
     
     private void updateBias() {

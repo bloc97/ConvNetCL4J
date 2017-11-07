@@ -201,7 +201,7 @@ public class UConvNN {
                 ImageIO.write(image, "png", new File(i + "resid.png"));
             }
             
-            sgd.update(network, 0.1f, 0.001f);
+            sgd.update(network, 1, 0.1f, 0.001f);
             
             
             
@@ -292,7 +292,7 @@ public class UConvNN {
             System.out.println(showError);
             
             
-            sgd.update(network, 0.1f, 0.01f);
+            sgd.update(network, 3, 0.1f, 0.01f);
             
             
             
