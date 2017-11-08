@@ -36,8 +36,8 @@ public class SpatialConvolutionLayer implements NeuronLayer {
     
     private float[] input = new float[0];
     private float[] inputError = new float[0];
-    private final int inputSize[] = new int[3]; //Width, Height, Depth
-    private final int inputDim[] = new int[3]; //Width, Width * Height, Total Length
+    private final int[] inputSize = new int[3]; //Width, Height, Depth
+    private final int[] inputDim = new int[3]; //Width, Width * Height, Total Length
     
     private float[] output = new float[0];
     private float[] outputError = new float[0];

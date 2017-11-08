@@ -19,8 +19,10 @@ import java.util.Arrays;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import nn.convolution.SpatialTransposedConvolutionLayer;
+import nn.elementwise.NearestNeighbour2D;
 import nn.elementwise.SkipConnectionEntry;
 import nn.elementwise.activation.ReLULayer;
+import nn.loss.CharbonnierErrorLossFunction;
 import nn.optim.SGD;
 import other.Scalr;
 
@@ -195,11 +197,22 @@ public class UConvNN {
         network.addLayer(skipLayer.createExit());
         network.addLayer(subNetwork);
         
-        NeuronLayer nlayerUpsample = new SpatialTransposedConvolutionLayer(6, 6, 64, 64, 2, 2, 2, 2);
-        Randomiser.uniform(nlayerUpsample, 0, (float)Math.sqrt(6f/nlayerUpsample.getFanIn()), random);
+        
+        NeuronLayer nlayerUpsample = new SpatialTransposedConvolutionLayer(4, 4, 64, 64, 2, 2, 1, 1);
+        Randomiser.uniform(nlayerUpsample, 0, (float)Math.sqrt(6f/nlayerUpsample.getFanIn() * 0.8f), random);
         network.addLayer(nlayerUpsample);
         alayer = new ReLULayer();
         network.addLayer(alayer);
+        
+        /*
+        Layer nlayerUpsample = new NearestNeighbour2D();
+        network.addLayer(nlayerUpsample);
+        nlayer = new SpatialConvolutionLayer(3, 3, 64, 64, 1, 1, 1, 1);
+        Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
+        network.addLayer(nlayer);
+        alayer = new ReLULayer();
+        network.addLayer(alayer);*/
+        
         
         nlayer = new SpatialConvolutionLayer(3, 3, 64, d, 1, 1, 1, 1);
         Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
@@ -210,7 +223,7 @@ public class UConvNN {
         
         System.out.println(Arrays.toString(nlayerUpsample.getOutputSize()));
         
-        LossFunction loss = new MeanSquaredErrorLossFunction();
+        LossFunction loss = new CharbonnierErrorLossFunction(1E-3f);
         SGD sgd = new SGD();
         
         float[] output;
@@ -233,7 +246,7 @@ public class UConvNN {
                 ImageIO.write(image, "png", new File(i + "resid.png"));
             }
             
-            sgd.update(network, 1, 0.001f);
+            sgd.update(network, 1, 1f, 0.001f);
             
             
             
