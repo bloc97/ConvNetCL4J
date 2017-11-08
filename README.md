@@ -6,15 +6,15 @@ This is still WIP.
 Currently done:  
 Convolutional Layer  
 Transpose Convolution Layer  
-ReLU Layer  
+ReLU Layer, LeakyReLU  
 SGD  
+SGD-Momentum  
 MSE Loss  
 Charbonnier Loss  
 
 Near future plans:  
-Other Rectifiers (Leaky, ELU, etc)  
+Other Rectifiers (ELU, etc)  
 Max Pooling Layer  
 Fully Connected Layer  
 Dilated Convolution Layer  
-SGD-Momentum  
 Adam  
