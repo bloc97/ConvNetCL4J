@@ -42,10 +42,6 @@ public class SGDMomentumKernel extends Kernel {
         
         float effectiveCost = effectiveGradient - (prop[4] * weights[i]); //l2 Weight decay
         
-        if (effectiveCost == 0) {
-            effectiveCost = -(1f/prop[4]) * effectiveGradient;
-        }
-        
         velocity[i] = (prop[3] * velocity[i]) + (prop[0] * effectiveCost);
         
         weights[i] = weights[i] + velocity[i];
