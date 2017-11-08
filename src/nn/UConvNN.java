@@ -180,8 +180,6 @@ public class UConvNN {
         Layer alayer = new LeakyReLULayer(0.2f);
         network.addLayer(alayer);
         
-        SkipConnectionEntry skipLayer = new SkipConnectionEntry();
-        network.addLayer(skipLayer);
         
         Network subNetwork1 = new Network();
         
@@ -204,13 +202,28 @@ public class UConvNN {
             subNetwork2.addLayer(alayer);
         }
         
+        SkipConnectionEntry skipLayer = new SkipConnectionEntry();
+        
+        network.addLayer(skipLayer);
         network.addLayer(subNetwork1);
         network.addLayer(skipLayer.createExit());
         network.addLayer(subNetwork2);
+        
         network.addLayer(skipLayer.createExit());
         network.addLayer(subNetwork1);
         network.addLayer(skipLayer.createExit());
         network.addLayer(subNetwork2);
+        
+        network.addLayer(skipLayer.createExit());
+        network.addLayer(subNetwork1);
+        network.addLayer(skipLayer.createExit());
+        network.addLayer(subNetwork2);
+        
+        network.addLayer(skipLayer.createExit());
+        network.addLayer(subNetwork1);
+        network.addLayer(skipLayer.createExit());
+        network.addLayer(subNetwork2);
+        
         
         
         NeuronLayer nlayerUpsample = new SpatialTransposedConvolutionLayer(4, 4, 64, 64, 2, 2, 1, 1);
@@ -219,10 +232,11 @@ public class UConvNN {
         alayer = new LeakyReLULayer(0.2f);
         network.addLayer(alayer);
         
+        
         /*
         Layer nlayerUpsample = new NearestNeighbour2D();
         network.addLayer(nlayerUpsample);
-        nlayer = new SpatialConvolutionLayer(3, 3, 64, 64, 1, 1, 1, 1);
+        nlayer = new SpatialConvolutionLayer(5, 5, 64, 64, 1, 1, 2, 2);
         Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
         network.addLayer(nlayer);
         alayer = new ReLULayer();
@@ -261,7 +275,7 @@ public class UConvNN {
                 ImageIO.write(image, "png", new File(i + "resid.png"));
             }
             
-            sgd.update(network, 1, 1f, 0.9f, 1e-5f, 0.001f);
+            sgd.update(network, 1, 0.1f, 0.9f, 1e-5f, 0.001f);
             
             
             

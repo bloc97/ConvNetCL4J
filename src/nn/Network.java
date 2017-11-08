@@ -66,12 +66,27 @@ public class Network implements Layer, Gradable {
     @Override
     public void resetGradients() {
         for (Layer layer : layers) {
-            if (layer instanceof NeuronLayer) {
-                NeuronLayer nlayer = (NeuronLayer) layer;
+            if (layer instanceof Gradable) {
+                Gradable nlayer = (Gradable) layer;
                 nlayer.resetGradients();
             }
         }
     }
+
+    @Override
+    public boolean isGradientZero() {
+        for (Layer layer : layers) {
+            if (layer instanceof Gradable) {
+                Gradable nlayer = (Gradable) layer;
+                if (!nlayer.isGradientZero()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    
 
     @Override
     public void setInputSize(int[] size) {

@@ -48,6 +48,8 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     private final int[] outputSize = new int[3];
     private final int[] outputDim = new int[3]; //Width, Width * Height, Total Length
     
+    private boolean isGradientZero = true;
+    
     public static class Checkpoint {
         
         public final float[] data;
@@ -144,6 +146,12 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     @Override
     public void resetGradients() {
         this.gradients = new float[kernelDim[3]];
+        isGradientZero = true;
+    }
+
+    @Override
+    public boolean isGradientZero() {
+        return isGradientZero;
     }
 
     @Override
@@ -189,6 +197,8 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
         errorCheckpoints.clear();
         long endTime = System.currentTimeMillis();
         System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
+        
+        isGradientZero = false;
     }
 
     @Override

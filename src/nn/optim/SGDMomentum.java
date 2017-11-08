@@ -23,12 +23,12 @@ public class SGDMomentum {
     public final Map<NeuronLayer, float[]> velocityMap = new HashMap<>();
     
     public void update(Network network, int batchSize, float learningRate, float momentum) {
-        update(network, batchSize, learningRate, momentum, 0, Float.MAX_VALUE);
+        update(network, batchSize, learningRate, momentum, 0, Float.MAX_VALUE, Float.MAX_VALUE);
     }
-    public void update(Network network, int batchSize, float learningRate, float momentum, float weightDecay, float clip) {
+    public void update(Network network, int batchSize, float learningRate, float momentum, float weightDecay, float clip, float velClip) {
         for (Layer layer : network.getLayers()) {
             if (layer instanceof Network) {
-                update((Network) layer, batchSize, learningRate, momentum, weightDecay, clip);
+                update((Network) layer, batchSize, learningRate, momentum, weightDecay, clip, velClip);
             } else if (layer instanceof NeuronLayer) {
                 NeuronLayer nlayer = (NeuronLayer) layer;
                 
@@ -36,8 +36,11 @@ public class SGDMomentum {
                     velocityMap.put(nlayer, new float[nlayer.getWeights().length]);
                 }
                 
-                KERNEL.call(nlayer.getWeights(), velocityMap.get(nlayer), nlayer.getGradients(), batchSize, learningRate, momentum, weightDecay, clip);
-                nlayer.resetGradients();
+                if (!nlayer.isGradientZero()) {
+                    KERNEL.call(nlayer.getWeights(), velocityMap.get(nlayer), nlayer.getGradients(), batchSize, learningRate, momentum, weightDecay, clip, velClip);
+                    nlayer.resetGradients();
+                    System.out.print("SGD | ");
+                }
             }
         }
     }

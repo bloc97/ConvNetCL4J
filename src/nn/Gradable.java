@@ -18,8 +18,13 @@ public interface Gradable {
      */
     public void grad();
     /**
-     * Resets the gradient array to 0;
+     * Resets the gradient array to 0.
      */
     public void resetGradients();
     
+    /**
+     * Checks if the gradient is empty.
+     * @return true if there is no gradient.
+     */
+    public boolean isGradientZero();
 }

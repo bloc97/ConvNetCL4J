@@ -18,9 +18,9 @@ public class SGDMomentumKernel extends Kernel {
     private float[] velocity = new float[0];
     private float[] gradients = new float[0];
     
-    private final float[] prop = new float[5];
+    private final float[] prop = new float[6];
     
-    public void call(float[] weights, float[] velocity, float[] gradients, int batchSize, float learningRate, float momentum, float weightDecay, float clip) {
+    public void call(float[] weights, float[] velocity, float[] gradients, int batchSize, float learningRate, float momentum, float weightDecay, float clip, float velClip) {
         this.weights = weights;
         this.velocity = velocity;
         this.gradients = gradients;
@@ -29,6 +29,7 @@ public class SGDMomentumKernel extends Kernel {
         prop[2] = batchSize;
         prop[3] = momentum;
         prop[4] = weightDecay;
+        prop[5] = velClip;
         
         Range range = Range.create(weights.length);
         execute(range);
@@ -44,7 +45,10 @@ public class SGDMomentumKernel extends Kernel {
         
         velocity[i] = (prop[3] * velocity[i]) + (prop[0] * effectiveCost);
         //Add velocity clipping, keep momentum but update gets clipped
-        weights[i] = weights[i] + velocity[i];
+        
+        float effectiveVelocity = min(max(velocity[i], -prop[5]), prop[5]);
+        
+        weights[i] = weights[i] + effectiveVelocity;
     }
     
 }

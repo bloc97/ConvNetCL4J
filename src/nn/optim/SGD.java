@@ -28,8 +28,13 @@ public class SGD {
                 update((Network) layer, batchSize, learningRate, clip);
             } else if (layer instanceof NeuronLayer) {
                 NeuronLayer nlayer = (NeuronLayer) layer;
-                KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), batchSize, learningRate, clip);
-                nlayer.resetGradients();
+                
+                if (!nlayer.isGradientZero()) {
+                    KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), batchSize, learningRate, clip);
+                    nlayer.resetGradients();
+                    System.out.print("SGD | ");
+                }
+                
             }
         }
     }

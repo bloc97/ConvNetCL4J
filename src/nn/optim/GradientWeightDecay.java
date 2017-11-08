@@ -10,31 +10,33 @@ import java.util.Set;
 import nn.Layer;
 import nn.Network;
 import nn.NeuronLayer;
+import nn.optim.kernels.GradientWeightDecayKernel;
 
 /**
  *
  * @author bowen
  */
-public class GradientClip {
+public class GradientWeightDecay {
     
-    public final static GradientClipKernel KERNEL = new GradientClipKernel();
+    public final static GradientWeightDecayKernel KERNEL = new GradientWeightDecayKernel();
     
-    public void clip(Network network, float clip) {
+    public void decay(Network network, float weightDecay) {
         Set<Layer> visitedLayers = new HashSet<>();
         
-        clip(network, clip, visitedLayers);
+        decay(network, weightDecay, visitedLayers);
     }
     
-    private void clip(Network network, float clip, Set<Layer> visitedLayers) {
+    private void decay(Network network, float weightDecay, Set<Layer> visitedLayers) {
         for (Layer layer : network.getLayers()) {
             if (layer instanceof Network) {
-                clip((Network) layer, clip, visitedLayers);
+                decay((Network) layer, weightDecay, visitedLayers);
             } else if (layer instanceof NeuronLayer) {
                 NeuronLayer nlayer = (NeuronLayer) layer;
                 
                 if (!nlayer.isGradientZero() && !visitedLayers.contains(layer)) {
-                    KERNEL.call(nlayer.getGradients(), clip);
+                    KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), weightDecay);
                     visitedLayers.add(layer);
+                    System.out.print("Decay " + weightDecay + " | ");
                 }
                 
             }
