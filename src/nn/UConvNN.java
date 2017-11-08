@@ -21,9 +21,11 @@ import javax.imageio.ImageIO;
 import nn.convolution.SpatialTransposedConvolutionLayer;
 import nn.elementwise.NearestNeighbour2D;
 import nn.elementwise.SkipConnectionEntry;
+import nn.elementwise.activation.LeakyReLULayer;
 import nn.elementwise.activation.ReLULayer;
 import nn.loss.CharbonnierErrorLossFunction;
 import nn.optim.SGD;
+import nn.optim.SGDMomentum;
 import other.Scalr;
 
 /**
@@ -175,33 +177,46 @@ public class UConvNN {
         NeuronLayer nlayer = new SpatialConvolutionLayer(3, 3, d, 64, 1, 1, 1, 1);
         Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
         network.addLayer(nlayer);
-        Layer alayer = new ReLULayer();
+        Layer alayer = new LeakyReLULayer(0.2f);
         network.addLayer(alayer);
         
         SkipConnectionEntry skipLayer = new SkipConnectionEntry();
         network.addLayer(skipLayer);
         
-        Network subNetwork = new Network();
+        Network subNetwork1 = new Network();
         
         for (int i=0; i<2; i++) {
             nlayer = new SpatialConvolutionLayer(3, 3, 64, 64, 1, 1, 1, 1);
             Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
-            subNetwork.addLayer(nlayer);
-            alayer = new ReLULayer();
-            subNetwork.addLayer(alayer);
+            subNetwork1.addLayer(nlayer);
+            alayer = new LeakyReLULayer(0.2f);
+            subNetwork1.addLayer(alayer);
         }
         
-        network.addLayer(subNetwork);
+        
+        Network subNetwork2 = new Network();
+        
+        for (int i=0; i<2; i++) {
+            nlayer = new SpatialConvolutionLayer(3, 3, 64, 64, 1, 1, 1, 1);
+            Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
+            subNetwork2.addLayer(nlayer);
+            alayer = new LeakyReLULayer(0.2f);
+            subNetwork2.addLayer(alayer);
+        }
+        
+        network.addLayer(subNetwork1);
         network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork);
+        network.addLayer(subNetwork2);
         network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork);
+        network.addLayer(subNetwork1);
+        network.addLayer(skipLayer.createExit());
+        network.addLayer(subNetwork2);
         
         
         NeuronLayer nlayerUpsample = new SpatialTransposedConvolutionLayer(4, 4, 64, 64, 2, 2, 1, 1);
         Randomiser.uniform(nlayerUpsample, 0, (float)Math.sqrt(6f/nlayerUpsample.getFanIn() * 0.8f), random);
         network.addLayer(nlayerUpsample);
-        alayer = new ReLULayer();
+        alayer = new LeakyReLULayer(0.2f);
         network.addLayer(alayer);
         
         /*
@@ -224,7 +239,7 @@ public class UConvNN {
         System.out.println(Arrays.toString(nlayerUpsample.getOutputSize()));
         
         LossFunction loss = new CharbonnierErrorLossFunction(1E-3f);
-        SGD sgd = new SGD();
+        SGDMomentum sgd = new SGDMomentum();
         
         float[] output;
         float[] outputError;
@@ -239,14 +254,14 @@ public class UConvNN {
             
             
             float showError = loss.getError(output, expectedOutput);
-            System.out.println(showError);
+            System.out.println("Iteration " + i + " " + showError);
             
             if (i % 10 == 0) {
                 image = getImage(output, 100, 100);
                 ImageIO.write(image, "png", new File(i + "resid.png"));
             }
             
-            sgd.update(network, 1, 1f, 0.001f);
+            sgd.update(network, 1, 1f, 0.9f, 1e-5f, 0.001f);
             
             
             

@@ -188,7 +188,7 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
         inputCheckpoints.clear();
         errorCheckpoints.clear();
         long endTime = System.currentTimeMillis();
-        System.out.println("Grad " + size + " " + (endTime-startTime) + " ms");
+        System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
     }
 
     @Override

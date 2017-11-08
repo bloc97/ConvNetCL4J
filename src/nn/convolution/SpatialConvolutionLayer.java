@@ -184,7 +184,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         errorCheckpoints.clear();
         long endTime = System.currentTimeMillis();
         if (size > 0) {
-            System.out.println("Grad " + size + " " + (endTime-startTime) + " ms");
+            System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
         }
     }
 
