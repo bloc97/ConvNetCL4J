@@ -27,7 +27,9 @@ public class SGDMomentum {
     }
     public void update(Network network, int batchSize, float learningRate, float momentum, float weightDecay, float clip) {
         for (Layer layer : network.getLayers()) {
-            if (layer instanceof NeuronLayer) {
+            if (layer instanceof Network) {
+                update((Network) layer, batchSize, learningRate, momentum, weightDecay, clip);
+            } else if (layer instanceof NeuronLayer) {
                 NeuronLayer nlayer = (NeuronLayer) layer;
                 
                 if (!velocityMap.containsKey(nlayer)) {

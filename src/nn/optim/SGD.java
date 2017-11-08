@@ -5,7 +5,7 @@
  */
 package nn.optim;
 
-import java.util.Arrays;
+
 import nn.Layer;
 import nn.Network;
 import nn.NeuronLayer;
@@ -24,7 +24,9 @@ public class SGD {
     }
     public void update(Network network, int batchSize, float learningRate, float clip) {
         for (Layer layer : network.getLayers()) {
-            if (layer instanceof NeuronLayer) {
+            if (layer instanceof Network) {
+                update((Network) layer, batchSize, learningRate, clip);
+            } else if (layer instanceof NeuronLayer) {
                 NeuronLayer nlayer = (NeuronLayer) layer;
                 KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), batchSize, learningRate, clip);
                 nlayer.resetGradients();
