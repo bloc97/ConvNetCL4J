@@ -38,11 +38,17 @@ public class SGDMomentumKernel extends Kernel {
     public void run() {
         int i = getGlobalId();
         
-        velocity[i] = (prop[3] * velocity[i]) + (prop[0] * (gradients[i] / prop[2]));
+        float effectiveGradient = min(max((gradients[i] / prop[2]), -prop[1]), prop[1]); //Clipping
         
-        float effectiveVel = min(max((velocity[i]), -prop[1]), prop[1]);
+        float effectiveCost = effectiveGradient - (prop[4] * weights[i]); //l2 Weight decay
         
-        weights[i] = weights[i] + effectiveVel - (prop[4] * weights[i]);
+        if (effectiveCost == 0) {
+            effectiveCost = -(1f/prop[4]) * effectiveGradient;
+        }
+        
+        velocity[i] = (prop[3] * velocity[i]) + (prop[0] * effectiveCost);
+        
+        weights[i] = weights[i] + velocity[i];
     }
     
 }

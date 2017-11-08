@@ -34,9 +34,9 @@ public class SGDKernel extends Kernel {
     public void run() {
         int i = getGlobalId();
         
-        float gradient = min(max((gradients[i] / prop[2]), -prop[1]), prop[1]);
+        float effectiveGradient = min(max((gradients[i] / prop[2]), -prop[1]), prop[1]);
         
-        weights[i] = weights[i] + (prop[0] * gradient);
+        weights[i] = weights[i] + (prop[0] * effectiveGradient);
     }
     
 }
