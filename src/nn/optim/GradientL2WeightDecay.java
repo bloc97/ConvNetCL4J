@@ -9,6 +9,6 @@ package nn.optim;
  *
  * @author bowen
  */
-public class GradientWeightDecay {
+public class GradientL2WeightDecay {
     
 }

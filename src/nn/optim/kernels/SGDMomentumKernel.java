@@ -43,7 +43,7 @@ public class SGDMomentumKernel extends Kernel {
         float effectiveCost = effectiveGradient - (prop[4] * weights[i]); //l2 Weight decay
         
         velocity[i] = (prop[3] * velocity[i]) + (prop[0] * effectiveCost);
-        
+        //Add velocity clipping, keep momentum but update gets clipped
         weights[i] = weights[i] + velocity[i];
     }
     
