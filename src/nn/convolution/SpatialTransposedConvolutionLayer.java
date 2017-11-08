@@ -8,20 +8,24 @@ package nn.convolution;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
-import nn.NeuronLayer;
+import java.util.List;
 import nn.convolution.kernels.BackwardSpatialConvolutionKernel;
-import nn.convolution.kernels.ForwardSpatialConvolutionKernel;
 import nn.convolution.kernels.GradSpatialConvolutionKernel;
+import nn.convolution.kernels.ForwardSpatialConvolutionKernel;
+import nn.NeuronLayer;
+import nn.convolution.kernels.BackwardSpatialTransposedConvolutionKernel;
+import nn.convolution.kernels.ForwardSpatialTransposedConvolutionKernel;
+import nn.convolution.kernels.GradSpatialTransposedConvolutionKernel;
 
 /**
  *
  * @author bowen
  */
-public class SpatialConvolutionLayer implements NeuronLayer {
+public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     
-    public final static ForwardSpatialConvolutionKernel FORWARDKERNEL = new ForwardSpatialConvolutionKernel();
-    public final static BackwardSpatialConvolutionKernel BACKWARDKERNEL = new BackwardSpatialConvolutionKernel();
-    public final static GradSpatialConvolutionKernel GRADKERNEL = new GradSpatialConvolutionKernel();
+    public final static ForwardSpatialTransposedConvolutionKernel FORWARDKERNEL = new ForwardSpatialTransposedConvolutionKernel();
+    public final static BackwardSpatialTransposedConvolutionKernel BACKWARDKERNEL = new BackwardSpatialTransposedConvolutionKernel();
+    public final static GradSpatialTransposedConvolutionKernel GRADKERNEL = new GradSpatialTransposedConvolutionKernel();
     
     private final LinkedList<Checkpoint> inputCheckpoints = new LinkedList<>();
     private final LinkedList<Checkpoint> errorCheckpoints = new LinkedList<>();
@@ -54,7 +58,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
     }
     
     
-    public SpatialConvolutionLayer(int w, int h , int d, int n, int shorz, int svert, int phorz, int pvert) { //TODO: Allow non-odd kernels and individual side padding
+    public SpatialTransposedConvolutionLayer(int w, int h , int d, int n, int shorz, int svert, int phorz, int pvert) { //TODO: Allow non-odd kernels and individual side padding
 
         int length = w * h * d * n + n;
         this.weights = new float[length];
@@ -84,7 +88,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         int h = size[1];
         int d = size[2];
         
-        if (d != kernelSize[2]) {
+        if (d != kernelSize[3]) {
             throw new IllegalArgumentException("Wrong input depth.");
         }
         int length = w * h * d;
@@ -98,10 +102,11 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         inputDim[1] = w * h;
         inputDim[2] = w * h * d;
         
-        outputSize[0] = (inputSize[0] - kernelSize[0] + (2 * padding[0])) / stride[0] + 1;
-        outputSize[1] = (inputSize[1] - kernelSize[1] + (2 * padding[1])) / stride[1] + 1;
-        outputSize[2] = kernelSize[3];
         
+        outputSize[0] = (inputSize[0] - 1) * stride[0] + kernelSize[0] - (2 * padding[0]);
+        outputSize[1] = (inputSize[1] - 1) * stride[1] + kernelSize[1] - (2 * padding[1]);
+        outputSize[2] = kernelSize[2];
+
         outputDim[0] = outputSize[0];
         outputDim[1] = outputSize[0] * outputSize[1];
         outputDim[2] = outputSize[0] * outputSize[1] * outputSize[2];
@@ -149,7 +154,6 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         this.input = input;
         
         inputCheckpoints.add(new Checkpoint(input));
-        
         FORWARDKERNEL.call(weights, kernelSize, kernelDim, stride, padding, input, inputSize, inputDim, output, outputSize, outputDim);
         
         return output;
@@ -163,7 +167,6 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         this.outputError = outputError;
         
         errorCheckpoints.addFirst(new Checkpoint(outputError));
-        
         BACKWARDKERNEL.call(weights, kernelSize, kernelDim, stride, padding, outputError, outputSize, outputDim, inputError, inputSize, inputDim);
         
         return inputError;
@@ -178,24 +181,24 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         Iterator<Checkpoint> oet = errorCheckpoints.iterator();
         
         while(iit.hasNext() && oet.hasNext()) {
-            GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, iit.next().data, inputSize, inputDim, oet.next().data, outputSize, outputDim);
+            float[] oetData = oet.next().data;
+            float[] iitData = iit.next().data;
+            GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, oetData, outputSize, outputDim, iitData, inputSize, inputDim);
         }
         inputCheckpoints.clear();
         errorCheckpoints.clear();
         long endTime = System.currentTimeMillis();
-        if (size > 0) {
-            System.out.println("Grad " + size + " " + (endTime-startTime) + " ms");
-        }
+        System.out.println("Grad " + size + " " + (endTime-startTime) + " ms");
     }
 
     @Override
     public int getFanIn() {
-        return kernelSize[0] * kernelSize[1] * kernelSize[2];
+        return kernelSize[0] * kernelSize[1] * kernelSize[3];
     }
 
     @Override
     public int getFanOut() {
-        return kernelSize[0] * kernelSize[1] * kernelSize[3];
+        return kernelSize[0] * kernelSize[1] * kernelSize[2];
     }
 
     

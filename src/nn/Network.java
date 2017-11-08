@@ -52,12 +52,12 @@ public class Network implements Layer, Gradable {
         }
         return data;
     }
-
+    
     @Override
     public void grad() {
         for (Layer layer : layers) {
-            if (layer instanceof NeuronLayer) {
-                NeuronLayer nlayer = (NeuronLayer) layer;
+            if (layer instanceof Gradable) {
+                Gradable nlayer = (Gradable) layer;
                 nlayer.grad();
             }
         }

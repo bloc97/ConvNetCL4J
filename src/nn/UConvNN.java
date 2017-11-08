@@ -16,7 +16,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 import javax.imageio.ImageIO;
+import nn.convolution.SpatialTransposedConvolutionLayer;
+import nn.elementwise.SkipConnectionEntry;
 import nn.elementwise.activation.ReLULayer;
 import nn.optim.SGD;
 import other.Scalr;
@@ -125,58 +128,87 @@ public class UConvNN {
         BufferedImage small = Scalr.resize(hr, Scalr.Method.BALANCED, Scalr.Mode.FIT_EXACT, 50, 50);
         BufferedImage lr = Scalr.resize(small, Scalr.Method.BALANCED, Scalr.Mode.FIT_EXACT, 100, 100);
         
-        int[] inputInt = lr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
+        int[] inputInt = small.getRGB(0, 0, 50, 50, new int[50*50*3], 0, 50);
+        int[] expectedLrInt = lr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
         int[] expectedOutputInt = hr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
         
-        Color c = new Color(expectedOutputInt[100*100]);
+        //Color c = new Color(expectedOutputInt[100*100]);
         
-        System.out.println(c.getRed());
-        System.out.println(c.getGreen());
-        System.out.println(c.getBlue());
+        //System.out.println(c.getRed());
+        //System.out.println(c.getGreen());
+        //System.out.println(c.getBlue());
         
         
-        float[] input = wrapImage(inputInt, 100, 100);
+        float[] input = wrapImage(inputInt, 50, 50);
+        float[] expectedLr = wrapImage(expectedLrInt, 100, 100);
         float[] expectedOutput = wrapImage(expectedOutputInt, 100, 100);
-        System.out.println(Arrays.toString(expectedOutputInt));
-        System.out.println(Arrays.toString(expectedOutput));
+        //System.out.println(Arrays.toString(expectedOutputInt));
+        //System.out.println(Arrays.toString(expectedOutput));
+        
+        for (int i=0; i<expectedLr.length; i++) {
+            expectedOutput[i] = (expectedOutput[i] - expectedLr[i]) * 2f;
+            expectedLr[i] = expectedLr[i] * 2f - 1f;
+        }
         
         for (int i=0; i<input.length; i++) {
-            expectedOutput[i] = (expectedOutput[i] - input[i]) * 2f;
             input[i] = input[i] * 2f - 1f;
         }
         
-        BufferedImage image = getImage(input, 100, 100);
+        BufferedImage image = getImage(input, 50, 50);
         ImageIO.write(image, "png", new File("input.png"));
         image = getImage(expectedOutput, 100, 100);
         ImageIO.write(image, "png", new File("expectedResid.png"));
+        image = getImage(expectedLr, 100, 100);
+        ImageIO.write(image, "png", new File("expectedLr.png"));
         
         
-        int x = 100;
-        int y = 100;
+        int x = 50;
+        int y = 50;
         int d = 3;
+        
+        Random random = new Random(4817623);
         
         Network network = new Network();
         
         NeuronLayer nlayer = new SpatialConvolutionLayer(3, 3, d, 64, 1, 1, 1, 1);
-        Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()));
+        Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
         network.addLayer(nlayer);
         Layer alayer = new ReLULayer();
         network.addLayer(alayer);
         
-        for (int i=0; i<5; i++) {
+        SkipConnectionEntry skipLayer = new SkipConnectionEntry();
+        network.addLayer(skipLayer);
+        
+        Network subNetwork = new Network();
+        
+        for (int i=0; i<2; i++) {
             nlayer = new SpatialConvolutionLayer(3, 3, 64, 64, 1, 1, 1, 1);
-            Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()));
-            network.addLayer(nlayer);
+            Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
+            subNetwork.addLayer(nlayer);
             alayer = new ReLULayer();
-            network.addLayer(alayer);
+            subNetwork.addLayer(alayer);
         }
         
+        network.addLayer(subNetwork);
+        network.addLayer(skipLayer.createExit());
+        network.addLayer(subNetwork);
+        network.addLayer(skipLayer.createExit());
+        network.addLayer(subNetwork);
+        
+        NeuronLayer nlayerUpsample = new SpatialTransposedConvolutionLayer(6, 6, 64, 64, 2, 2, 2, 2);
+        Randomiser.uniform(nlayerUpsample, 0, (float)Math.sqrt(6f/nlayerUpsample.getFanIn()), random);
+        network.addLayer(nlayerUpsample);
+        alayer = new ReLULayer();
+        network.addLayer(alayer);
+        
         nlayer = new SpatialConvolutionLayer(3, 3, 64, d, 1, 1, 1, 1);
-        Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()));
+        Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
         network.addLayer(nlayer);
         
         
         network.setInputSize(new int[] {x, y, d});
+        
+        System.out.println(Arrays.toString(nlayerUpsample.getOutputSize()));
         
         LossFunction loss = new MeanSquaredErrorLossFunction();
         SGD sgd = new SGD();
@@ -201,7 +233,7 @@ public class UConvNN {
                 ImageIO.write(image, "png", new File(i + "resid.png"));
             }
             
-            sgd.update(network, 1, 0.1f, 0.001f);
+            sgd.update(network, 1, 0.001f);
             
             
             
