@@ -157,6 +157,8 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     public void resetGradients() {
         this.gradients = new float[kernelDim[3]];
         isGradientZero = true;
+        inputCheckpoints.clear();
+        errorCheckpoints.clear();
     }
 
     @Override
@@ -206,7 +208,7 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
         inputCheckpoints.clear();
         errorCheckpoints.clear();
         long endTime = System.currentTimeMillis();
-        System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
+        //System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
         
         isGradientZero = false;
     }
