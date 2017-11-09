@@ -45,6 +45,8 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     private final int[] outputSize = new int[4];
     private final int[] outputDim = new int[4];
     
+    private boolean isGradientEmpty = true;
+    
     public SpatialTransposedConvolutionLayer(int w, int h , int d, int n, int shorz, int svert, int phorz, int pvert) { //TODO: Allow non-odd kernels and individual side padding
 
         int length = w * h * d * n + n;
@@ -144,9 +146,16 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     public float[] getGradients() {
         return gradients;
     }
+    
     @Override
     public void resetGradients() {
         Arrays.fill(gradients, 0);
+        isGradientEmpty = true;
+    }
+
+    @Override
+    public boolean isGradientEmpty() {
+        return isGradientEmpty;
     }
 
     @Override
@@ -176,6 +185,7 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     @Override
     public void grad() {
         GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, outputError, outputSize, outputDim, input, inputSize, inputDim);
+        isGradientEmpty = false;
     }
 
     @Override

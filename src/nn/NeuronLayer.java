@@ -31,4 +31,6 @@ public interface NeuronLayer extends Layer, Gradable {
     
     public Layer createSharedClone();
     
+    public boolean isGradientEmpty();
+    
 }
