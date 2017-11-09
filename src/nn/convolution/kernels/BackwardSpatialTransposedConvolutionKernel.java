@@ -23,12 +23,12 @@ public class BackwardSpatialTransposedConvolutionKernel extends Kernel { //Sums 
     private int[] padding = new int[2]; //Padding: Horizontal, Vertical
     
     private float[] input = new float[0];
-    private int inputSize[] = new int[3]; //Width, Height, Depth
-    private int inputDim[] = new int[3]; //Width, Width * Height, Total Length
+    private int inputSize[] = new int[4]; //Width, Height, Depth
+    private int inputDim[] = new int[4]; //Width, Width * Height, Total Length
     
     private float[] output = new float[0];
-    private int[] outputSize = new int[3];
-    private int[] outputDim = new int[3]; //Width, Width * Height, Total Length
+    private int[] outputSize = new int[4];
+    private int[] outputDim = new int[4]; //Width, Width * Height, Total Length
     
     public void call(float[] weights, int[] kernelSize, int[] kernelDim, int[] stride, int padding[], float[] input, int[] inputSize, int[] inputDim, float[] output, int[] outputSize, int[] outputDim) {
         this.weights = weights;
@@ -45,11 +45,11 @@ public class BackwardSpatialTransposedConvolutionKernel extends Kernel { //Sums 
         this.outputSize = outputSize;
         this.outputDim = outputDim;
         
-        Range range = Range.create3D(outputSize[0], outputSize[1], outputSize[2]);
+        Range range = Range.create3D(outputSize[0], outputSize[1], outputSize[2] * outputSize[3]);
         execute(range);
     }
     
-    private float getInput(int i, int j, int k) {
+    private float getInput(int i, int j, int k, int n) {
         i = i - padding[0];
         j = j - padding[1];
         
@@ -59,7 +59,7 @@ public class BackwardSpatialTransposedConvolutionKernel extends Kernel { //Sums 
             return 0;
         }
         
-        return input[k * inputDim[1] + j * inputDim[0] + i];
+        return input[n * inputDim[2] + k * inputDim[1] + j * inputDim[0] + i];
     }
     
     private float getWeight(int i, int j, int k, int n) {
@@ -74,9 +74,10 @@ public class BackwardSpatialTransposedConvolutionKernel extends Kernel { //Sums 
     public void run() {
         int i = getGlobalId(0); //Output Volume i,j,n
         int j = getGlobalId(1);
-        int n = getGlobalId(2);
+        int k = getGlobalId(2)      % outputSize[2];
+        int n =(getGlobalId(2) - k) / outputSize[2];
         
-        int outputIndex = n * outputDim[1] + j * outputDim[0] + i;
+        int outputIndex = n * outputDim[2] + k * outputDim[1] + j * outputDim[0] + i;
         
         int inputPosi = i * stride[0];
         int inputPosj = j * stride[1];
@@ -86,7 +87,7 @@ public class BackwardSpatialTransposedConvolutionKernel extends Kernel { //Sums 
         for (int ii = 0; ii < kernelSize[0]; ii++) {
             for (int ij = 0; ij < kernelSize[1]; ij++) {
                 for (int ik = 0; ik < kernelSize[2]; ik++) {
-                    output[outputIndex] = output[outputIndex] + (getInput(ii + inputPosi, ij + inputPosj, ik) * getWeight(ii, ij, ik, n));
+                    output[outputIndex] = output[outputIndex] + (getInput(ii + inputPosi, ij + inputPosj, ik, n) * getWeight(ii, ij, ik, k));
                 }
             }
         }

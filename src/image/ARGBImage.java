@@ -73,7 +73,11 @@ public class ARGBImage {
     
     public ARGBImage(float[] image, int[] imageSize, float darkestValue, float brightestValue) {
         if (imageSize.length != 3) {
-            throw new IllegalArgumentException("Image must be dimension 3.");
+            if (imageSize.length != 4) {
+                throw new IllegalArgumentException("Image must be dimension 3 or 4.");
+            } else if (imageSize.length == 4 && imageSize[3] != 1) {
+                throw new IllegalArgumentException("Cannot process a image batch into a single image.");
+            }
         } else if (imageSize[2] != 3 && imageSize[2] != 4) {
             throw new IllegalArgumentException("Image must have 3 or 4 channels.");
         }

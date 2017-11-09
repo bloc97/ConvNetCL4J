@@ -19,20 +19,18 @@ public class NearestNeighbour2D implements Layer {
     
     private float[] input = new float[0];
     private float[] inputError = new float[0];
-    private final int[] inputSize = new int[3]; //Width, Height, Depth
-    private final int[] inputDim = new int[3]; //Width, Width * Height, Total Length
+    private final int[] inputSize = new int[4]; //Width, Height, Depth, N
+    private final int[] inputDim = new int[4]; //Width, Width * Height, Length, Total Length
     
     private float[] output = new float[0];
     private float[] outputError = new float[0];
-    private final int[] outputSize = new int[3];
-    private final int[] outputDim = new int[3]; //Width, Width * Height, Total Length
-    
-    private int inputLength = 0;
+    private final int[] outputSize = new int[4];
+    private final int[] outputDim = new int[4]; //Width, Width * Height, Length, Total Length
 
     @Override
     public void setInputSize(int[] size) {
-        if (size.length != 3) {
-           throw new IllegalArgumentException("Input dimension must be 3");
+        if (size.length != 4) {
+           throw new IllegalArgumentException("Input dimension must be 4");
         }
         
         for (int i=0; i<size.length; i++) {
@@ -42,19 +40,22 @@ public class NearestNeighbour2D implements Layer {
         outputSize[0] = inputSize[0] * 2;
         outputSize[1] = inputSize[1] * 2;
         outputSize[2] = inputSize[2];
+        outputSize[3] = inputSize[3];
         
         inputDim[0] = inputSize[0];
         inputDim[1] = inputSize[0] * inputSize[1];
         inputDim[2] = inputSize[0] * inputSize[1] * inputSize[2];
+        inputDim[3] = inputSize[0] * inputSize[1] * inputSize[2] * inputSize[3];
         
         outputDim[0] = outputSize[0];
         outputDim[1] = outputSize[0] * outputSize[1];
         outputDim[2] = outputSize[0] * outputSize[1] * outputSize[2];
+        outputDim[3] = outputSize[0] * outputSize[1] * outputSize[2] * outputSize[3];
         
-        input = new float[inputDim[2]];
-        inputError = new float[inputDim[2]];
-        output = new float[outputDim[2]];
-        outputError = new float[outputDim[2]];
+        input = new float[inputDim[3]];
+        inputError = new float[inputDim[3]];
+        output = new float[outputDim[3]];
+        outputError = new float[outputDim[3]];
         
     }
 

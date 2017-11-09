@@ -132,9 +132,15 @@ public class UConvNN {
         BufferedImage small = Scalr.resize(hr, Scalr.Method.BALANCED, Scalr.Mode.FIT_EXACT, 50, 50);
         BufferedImage lr = Scalr.resize(small, Scalr.Method.BALANCED, Scalr.Mode.FIT_EXACT, 100, 100);
         
+        BufferedImage other = ImageIO.read(new File("girl50.png"));
+        BufferedImage otherHr = ImageIO.read(new File("girl100.png"));
+        
         int[] inputInt = small.getRGB(0, 0, 50, 50, new int[50*50*3], 0, 50);
         int[] expectedLrInt = lr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
         int[] expectedOutputInt = hr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
+        
+        int[] otherInt = other.getRGB(0, 0, 50, 50, new int[50*50*3], 0, 50);
+        int[] otherHrInt = otherHr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
         
         //Color c = new Color(expectedOutputInt[100*100]);
         
@@ -146,16 +152,22 @@ public class UConvNN {
         float[] input = wrapImage(inputInt, 50, 50);
         float[] expectedLr = wrapImage(expectedLrInt, 100, 100);
         float[] expectedOutput = wrapImage(expectedOutputInt, 100, 100);
+        
+        float[] otherFloat = wrapImage(otherInt, 50, 50);
+        float[] otherHrFloat = wrapImage(otherHrInt, 100, 100);
+        
         //System.out.println(Arrays.toString(expectedOutputInt));
         //System.out.println(Arrays.toString(expectedOutput));
         
         for (int i=0; i<expectedLr.length; i++) {
             expectedOutput[i] = (expectedOutput[i] - expectedLr[i]) * 2f;
             expectedLr[i] = expectedLr[i] * 2f - 1f;
+            otherHrFloat[i] = otherHrFloat[i] * 2f - 1f;
         }
         
         for (int i=0; i<input.length; i++) {
             input[i] = input[i] * 2f - 1f;
+            otherFloat[i] = otherFloat[i] * 2f - 1f;
         }
         
         BufferedImage image = getImage(input, 50, 50);
@@ -166,61 +178,23 @@ public class UConvNN {
         ImageIO.write(image, "png", new File("expectedLr.png"));
         
         
-        int x = 50;
-        int y = 50;
+        int x = 100;
+        int y = 100;
         int d = 3;
         
         Random random = new Random(4817623);
         
         Network network = new Network();
         
-        NeuronLayer nlayer = new SpatialConvolutionLayer(3, 3, d, 64, 1, 1, 1, 1);
-        Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
+        //NeuronLayer nlayer = new SpatialTransposedConvolutionLayer(4, 4, d, d, 2, 2, 1, 1);
+        
+        /*
+        NeuronLayer nlayer = new SpatialConvolutionLayer(5, 5, d, d, 1, 1, 2, 2);
+        Randomiser.kaimingUniform(nlayer, random);
         network.addLayer(nlayer);
-        Layer alayer = new LeakyReLULayer(0.2f);
-        network.addLayer(alayer);
-        
-        
-        Network subNetwork1 = new Network();
-        
-        for (int i=0; i<2; i++) {
-            nlayer = new SpatialConvolutionLayer(3, 3, 64, 64, 1, 1, 1, 1);
-            Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
-            subNetwork1.addLayer(nlayer);
-            alayer = new LeakyReLULayer(0.2f);
-            subNetwork1.addLayer(alayer);
-        }
-        
-        
-        Network subNetwork2 = new Network();
-        
-        for (int i=0; i<2; i++) {
-            nlayer = new SpatialConvolutionLayer(3, 3, 64, 64, 1, 1, 1, 1);
-            Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
-            subNetwork2.addLayer(nlayer);
-            alayer = new LeakyReLULayer(0.2f);
-            subNetwork2.addLayer(alayer);
-        }
-        
-        SkipConnectionEntry skipLayer = new SkipConnectionEntry();
-        
-        network.addLayer(skipLayer);
-        network.addLayer(subNetwork1);
-        network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork2);
-        
-        network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork1);
-        network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork2);
-        
-        
-        NeuronLayer nlayerUpsample = new SpatialTransposedConvolutionLayer(4, 4, 64, 64, 2, 2, 1, 1);
-        Randomiser.uniform(nlayerUpsample, 0, (float)Math.sqrt(6f/nlayerUpsample.getFanIn()), random);
-        network.addLayer(nlayerUpsample);
-        alayer = new LeakyReLULayer(0.2f);
-        network.addLayer(alayer);
-        
+        */
+        SkipConnectionEntry entry = new SkipConnectionEntry();
+        network.addLayer(entry.createExit());
         
         /*
         Layer nlayerUpsample = new NearestNeighbour2D();
@@ -232,14 +206,10 @@ public class UConvNN {
         network.addLayer(alayer);*/
         
         
-        nlayer = new SpatialConvolutionLayer(3, 3, 64, d, 1, 1, 1, 1);
-        Randomiser.uniform(nlayer, 0, (float)Math.sqrt(6f/nlayer.getFanIn()), random);
-        network.addLayer(nlayer);
+        entry.setInputSize(new int[] {x, y, d, 1});
+        network.setInputSize(new int[] {x, y, d, 1});
         
-        
-        network.setInputSize(new int[] {x, y, d});
-        
-        System.out.println(Arrays.toString(nlayerUpsample.getOutputSize()));
+        //System.out.println(Arrays.toString(nlayer.getOutputSize()));
         
         LossFunction loss = new CharbonnierErrorLossFunction(1E-3f);
         SGDMomentum sgd = new SGDMomentum();
@@ -250,17 +220,17 @@ public class UConvNN {
         for (int i=0; i<1000; i++) {
             
             
-            output = network.forward(input);
-            outputError = loss.getErrorDerivativeArray(output, expectedOutput);
-            network.backward(outputError);
-            network.grad();
+            output = entry.forward(expectedLr);
+            //outputError = loss.getErrorDerivativeArray(output, expectedOutput);
+            //network.backward(outputError);
+            //network.grad();
             
-            
-            float showError = loss.getError(output, expectedOutput);
+            float showError = loss.getError(expectedLr, expectedLr);
             System.out.println("Iteration " + i + " " + showError);
             
             if (i % 10 == 0) {
-                image = getImage(output, 100, 100);
+                float[] o = network.forward(expectedLr);
+                image = getImage(o, 100, 100);
                 ImageIO.write(image, "png", new File(i + "resid.png"));
             }
             

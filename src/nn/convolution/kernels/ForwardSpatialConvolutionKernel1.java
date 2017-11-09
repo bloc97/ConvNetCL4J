@@ -13,7 +13,7 @@ import com.aparapi.device.Device;
  *
  * @author bowen
  */
-public class ForwardSpatialConvolutionKernel extends Kernel { //Sums the result of kernel depths, normal convolution
+public class ForwardSpatialConvolutionKernel1 extends Kernel { //Sums the result of kernel depths, normal convolution
     
     private float[] weights = new float[0];
     private int[] kernelSize = new int[4]; //Width, Height, Depth, Number
@@ -94,4 +94,5 @@ public class ForwardSpatialConvolutionKernel extends Kernel { //Sums the result 
         
         output[outputIndex] = output[outputIndex] + getBiasWeight(ok);
     }
+    
 }

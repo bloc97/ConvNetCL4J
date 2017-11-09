@@ -23,12 +23,12 @@ public class ForwardSpatialTransposedConvolutionKernel extends Kernel {
     private int[] padding = new int[2]; //Padding: Horizontal, Vertical
     
     private float[] outputError = new float[0];
-    private int[] outputErrorSize = new int[3];
-    private int[] outputErrorDim = new int[3]; //Width, Width * Height, Total Length
+    private int[] outputErrorSize = new int[4];
+    private int[] outputErrorDim = new int[4]; //Width, Width * Height, Total Length
     
     private float[] inputError = new float[0];
-    private int inputErrorSize[] = new int[3]; //Width, Height, Depth
-    private int inputErrorDim[] = new int[3]; //Width, Width * Height, Total Length
+    private int inputErrorSize[] = new int[4]; //Width, Height, Depth
+    private int inputErrorDim[] = new int[4]; //Width, Width * Height, Total Length
     
     
     public void call(float[] weights, int[] kernelSize, int[] kernelDim, int[] stride, int padding[], float[] outputError, int[] outputErrorSize, int[] outputErrorDim, float[] inputError, int[] inputErrorSize, int[] inputErrorDim) {
@@ -46,17 +46,17 @@ public class ForwardSpatialTransposedConvolutionKernel extends Kernel {
         this.inputErrorSize = inputErrorSize;
         this.inputErrorDim = inputErrorDim;
         
-        Range range = Range.create3D(inputErrorSize[0], inputErrorSize[1], inputErrorSize[2]);
+        Range range = Range.create3D(inputErrorSize[0], inputErrorSize[1], inputErrorSize[2] * inputErrorSize[3]);
         execute(range);
     }
     
-    private float getOutputErrorByInputAndWeight(int i, int j, int k, int wi, int wj, int wn) {
+    private float getOutputErrorByInputAndWeight(int i, int j, int k, int n, int wi, int wj, int wn) {
         
         int i_rel = i - wi + padding[0];
         int j_rel = j - wj + padding[1];
         
         if (i_rel % stride[0] == 0 && j_rel % stride[1] == 0) {
-            return getOutputError(i_rel / stride[0], j_rel / stride[1], wn);
+            return getOutputError(i_rel / stride[0], j_rel / stride[1], wn, n);
         }
         return 0;
     }
@@ -76,7 +76,7 @@ public class ForwardSpatialTransposedConvolutionKernel extends Kernel {
         return weights[(n + 1) * kernelDim[2] - 1];
     }
     
-    private float getOutputError(int i, int j, int k) {
+    private float getOutputError(int i, int j, int k, int n) {
         
         if (i < 0 || j < 0) {
             return 0;
@@ -84,23 +84,24 @@ public class ForwardSpatialTransposedConvolutionKernel extends Kernel {
             return 0;
         }
         
-        return outputError[k * outputErrorDim[1] + j * outputErrorDim[0] + i];
+        return outputError[n * outputErrorDim[2] + k * outputErrorDim[1] + j * outputErrorDim[0] + i];
     }
     
     @Override
     public void run() {
         int i = getGlobalId(0); //Input Volume i,j,k
         int j = getGlobalId(1);
-        int k = getGlobalId(2);
+        int k = getGlobalId(2)      % inputErrorSize[2];
+        int n =(getGlobalId(2) - k) / inputErrorSize[2];
         
-        int inputErrorIndex = k * inputErrorDim[1] + j * inputErrorDim[0] + i;
+        int inputErrorIndex = n * inputErrorDim[2] + k * inputErrorDim[1] + j * inputErrorDim[0] + i;
         
         inputError[inputErrorIndex] = 0;
         
         for (int wi = 0; wi < kernelSize[0]; wi++) {
             for (int wj = 0; wj < kernelSize[1]; wj++) {
                 for (int wn = 0; wn < kernelSize[3]; wn++) {
-                    inputError[inputErrorIndex] = inputError[inputErrorIndex] + (getOutputErrorByInputAndWeight(i, j, k, wi, wj, wn) * getWeight(wi, wj, k, wn));
+                    inputError[inputErrorIndex] = inputError[inputErrorIndex] + (getOutputErrorByInputAndWeight(i, j, k, n, wi, wj, wn) * getWeight(wi, wj, k, wn));
                 }
             }
         }

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import nn.Layer;
+import nn.elementwise.kernels.AddSkipConnectionEntryKernel;
 
 
 /**
@@ -17,6 +18,7 @@ import nn.Layer;
  */
 public class SkipConnectionEntry implements Layer {
     
+    public final static AddSkipConnectionEntryKernel ADDKERNEL = new AddSkipConnectionEntryKernel();
     
     private float[] input = new float[0];
     private float[] inputError = new float[0];
@@ -29,16 +31,11 @@ public class SkipConnectionEntry implements Layer {
     
     
     private final List<SkipConnectionExit> exits;
-    private double[] skipError;
+    private float[] skipError;
     
     public SkipConnectionEntry() {
         exits = new LinkedList<>();
-        skipError = new double[0];
-    }
-    
-    private SkipConnectionEntry(List<SkipConnectionExit> exits) {
-        this.exits = exits;
-        this.skipError = new double[0];
+        skipError = new float[0];
     }
     
     public SkipConnectionExit createExit() {
@@ -51,7 +48,8 @@ public class SkipConnectionEntry implements Layer {
         if (outputError.length != inputLength) {
             throw new IllegalArgumentException("Wrong output error array size.");
         }
-        Arrays.parallelSetAll(skipError, i -> skipError[i] + outputError[i]);
+        
+        ADDKERNEL.call(skipError, skipError, outputError);
     }
     
     @Override
@@ -61,9 +59,8 @@ public class SkipConnectionEntry implements Layer {
         }
         
         this.input = input;
-        this.output = Arrays.copyOf(this.input, input.length);
+        this.output = input;//Arrays.copyOf(input, inputLength);
         
-        this.skipError = new double[input.length];
         for (SkipConnectionExit exit : exits) {
             exit.setSkipInput(this.output);
         }
@@ -78,11 +75,9 @@ public class SkipConnectionEntry implements Layer {
         }
         
         this.outputError = outputError;
-        this.inputError = new float[outputError.length];
         
-        for (int i=0; i<this.inputError.length; i++) {
-            this.inputError[i] = this.outputError[i] + (float)skipError[i];
-        }
+        ADDKERNEL.call(inputError, outputError, skipError);
+        
         return this.inputError;
     }
 
@@ -97,6 +92,9 @@ public class SkipConnectionEntry implements Layer {
             length *= size[i];
         }
         inputLength = length;
+        
+        this.skipError = new float[inputLength];
+        this.inputError = new float[inputLength];
     }
 
     @Override
@@ -130,11 +128,8 @@ public class SkipConnectionEntry implements Layer {
                 throw new IllegalArgumentException("Input of wrong size!");
             }
             
-            float[] newInput = Arrays.copyOf(input, input.length);
-            
-            for (int i=0; i<newInput.length; i++) {
-                newInput[i] = newInput[i] + skipInput[i];
-            }
+            float[] newInput = new float[input.length];
+            ADDKERNEL.call(newInput, input, skipInput);
             return newInput;
         }
 

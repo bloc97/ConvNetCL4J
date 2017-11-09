@@ -13,7 +13,7 @@ import com.aparapi.device.Device;
  *
  * @author bowen
  */
-public class BackwardSpatialConvolutionKernel extends Kernel {
+public class BackwardSpatialConvolutionKernel1 extends Kernel {
 
     private float[] weights = new float[0];
     private int[] kernelSize = new int[4]; //Width, Height, Depth, Number

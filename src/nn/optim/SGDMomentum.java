@@ -36,11 +36,8 @@ public class SGDMomentum {
                     velocityMap.put(nlayer, new float[nlayer.getWeights().length]);
                 }
                 
-                if (!nlayer.isGradientZero()) {
-                    KERNEL.call(nlayer.getWeights(), velocityMap.get(nlayer), nlayer.getGradients(), batchSize, learningRate, momentum, weightDecay, clip, velClip);
-                    nlayer.resetGradients();
-                    //System.out.print("SGD | ");
-                }
+                KERNEL.call(nlayer.getWeights(), velocityMap.get(nlayer), nlayer.getGradients(), batchSize, learningRate, momentum, weightDecay, clip, velClip);
+                nlayer.resetGradients();
             }
         }
     }

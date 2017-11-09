@@ -74,21 +74,6 @@ public class Network implements Layer, Gradable {
     }
 
     @Override
-    public boolean isGradientZero() {
-        for (Layer layer : layers) {
-            if (layer instanceof Gradable) {
-                Gradable nlayer = (Gradable) layer;
-                if (!nlayer.isGradientZero()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    
-    
-
-    @Override
     public void setInputSize(int[] size) {
         int[] data = size;
         for (Layer layer : layers) {

@@ -29,10 +29,8 @@ public class SGD {
             } else if (layer instanceof NeuronLayer) {
                 NeuronLayer nlayer = (NeuronLayer) layer;
                 
-                if (!nlayer.isGradientZero()) {
-                    KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), batchSize, learningRate, clip);
-                    nlayer.resetGradients();
-                }
+                KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), batchSize, learningRate, clip);
+                nlayer.resetGradients();
                 
             }
         }

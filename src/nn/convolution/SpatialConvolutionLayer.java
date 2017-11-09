@@ -23,9 +23,6 @@ public class SpatialConvolutionLayer implements NeuronLayer {
     public final static BackwardSpatialConvolutionKernel BACKWARDKERNEL = new BackwardSpatialConvolutionKernel();
     public final static GradSpatialConvolutionKernel GRADKERNEL = new GradSpatialConvolutionKernel();
     
-    private final LinkedList<Checkpoint> inputCheckpoints = new LinkedList<>();
-    private final LinkedList<Checkpoint> errorCheckpoints = new LinkedList<>();
-    
     private float[] weights = new float[0];
     private float[] gradients = new float[0];
     private final int[] kernelSize = new int[4]; //Width, Height, Depth, Number
@@ -36,25 +33,13 @@ public class SpatialConvolutionLayer implements NeuronLayer {
     
     private float[] input = new float[0];
     private float[] inputError = new float[0];
-    private final int[] inputSize = new int[3]; //Width, Height, Depth
-    private final int[] inputDim = new int[3]; //Width, Width * Height, Total Length
+    private final int[] inputSize = new int[4]; //Width, Height, Depth, N
+    private final int[] inputDim = new int[4]; //Width, Width * Height, Length, Total Length
     
     private float[] output = new float[0];
     private float[] outputError = new float[0];
-    private final int[] outputSize = new int[3];
-    private final int[] outputDim = new int[3]; //Width, Width * Height, Total Length
-    
-    private boolean isGradientZero = true;
-    
-    public static class Checkpoint {
-        
-        public final float[] data;
-        
-        public Checkpoint(float[] data) {
-            this.data = Arrays.copyOf(data, data.length);
-        }
-    }
-    
+    private final int[] outputSize = new int[4];
+    private final int[] outputDim = new int[4];
     
     public SpatialConvolutionLayer(int w, int h , int d, int n, int shorz, int svert, int phorz, int pvert) { //TODO: Allow non-odd kernels and individual side padding
 
@@ -88,36 +73,42 @@ public class SpatialConvolutionLayer implements NeuronLayer {
     
     @Override
     public void setInputSize(int[] size) {
-        if (size.length != 3) {
+        if (size.length != 4) {
             throw new IllegalArgumentException("Wrong input dimension.");
         }
         int w = size[0];
         int h = size[1];
         int d = size[2];
+        int n = size[3];
         
         if (d != kernelSize[2]) {
             throw new IllegalArgumentException("Wrong input depth.");
         }
-        int length = w * h * d;
+        int length = w * h * d * n;
         input = new float[length];
         inputError = new float[length];
         inputSize[0] = w;
         inputSize[1] = h;
         inputSize[2] = d;
+        inputSize[3] = n;
         
         inputDim[0] = w;
         inputDim[1] = w * h;
         inputDim[2] = w * h * d;
+        inputDim[3] = w * h * d * n;
         
         outputSize[0] = (inputSize[0] - kernelSize[0] + (2 * padding[0])) / stride[0] + 1;
         outputSize[1] = (inputSize[1] - kernelSize[1] + (2 * padding[1])) / stride[1] + 1;
         outputSize[2] = kernelSize[3];
+        outputSize[3] = n;
         
         outputDim[0] = outputSize[0];
         outputDim[1] = outputSize[0] * outputSize[1];
         outputDim[2] = outputSize[0] * outputSize[1] * outputSize[2];
-        output = new float[outputDim[2]];
-        outputError = new float[outputDim[2]];
+        outputDim[3] = outputSize[0] * outputSize[1] * outputSize[2] * outputSize[3];
+        
+        output = new float[outputDim[3]];
+        outputError = new float[outputDim[3]];
     }
     
     @Override
@@ -149,15 +140,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
     }
     @Override
     public void resetGradients() {
-        this.gradients = new float[kernelDim[3]];
-        isGradientZero = true;
-        inputCheckpoints.clear();
-        errorCheckpoints.clear();
-    }
-
-    @Override
-    public boolean isGradientZero() {
-        return isGradientZero;
+        Arrays.fill(gradients, 0);
     }
 
     @Override
@@ -166,8 +149,6 @@ public class SpatialConvolutionLayer implements NeuronLayer {
             throw new IllegalArgumentException("Wrong input array size.");
         }
         this.input = input;
-        
-        //inputCheckpoints.add(new Checkpoint(input));
         
         FORWARDKERNEL.call(weights, kernelSize, kernelDim, stride, padding, input, inputSize, inputDim, output, outputSize, outputDim);
         
@@ -181,8 +162,6 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         }
         this.outputError = outputError;
         
-        //errorCheckpoints.addFirst(new Checkpoint(outputError));
-        
         BACKWARDKERNEL.call(weights, kernelSize, kernelDim, stride, padding, outputError, outputSize, outputDim, inputError, inputSize, inputDim);
         
         return inputError;
@@ -190,26 +169,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
 
     @Override
     public void grad() {
-        
         GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, input, inputSize, inputDim, outputError, outputSize, outputDim);
-        /*
-        long startTime = System.currentTimeMillis();
-        int size = inputCheckpoints.size();
-        
-        Iterator<Checkpoint> iit = inputCheckpoints.iterator();
-        Iterator<Checkpoint> oet = errorCheckpoints.iterator();
-        
-        while(iit.hasNext() && oet.hasNext()) {
-            GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, iit.next().data, inputSize, inputDim, oet.next().data, outputSize, outputDim);
-        }
-        inputCheckpoints.clear();
-        errorCheckpoints.clear();
-        long endTime = System.currentTimeMillis();
-        if (size > 0) {
-            //System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
-        }
-        */
-        isGradientZero = false;
     }
 
     @Override
