@@ -25,4 +25,5 @@ public interface Bidirectional {
      */
     public float[] backward(float[] outputError);
     
+    
 }

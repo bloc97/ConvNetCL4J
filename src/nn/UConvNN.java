@@ -214,20 +214,9 @@ public class UConvNN {
         network.addLayer(skipLayer.createExit());
         network.addLayer(subNetwork2);
         
-        network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork1);
-        network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork2);
-        
-        network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork1);
-        network.addLayer(skipLayer.createExit());
-        network.addLayer(subNetwork2);
-        
-        
         
         NeuronLayer nlayerUpsample = new SpatialTransposedConvolutionLayer(4, 4, 64, 64, 2, 2, 1, 1);
-        Randomiser.uniform(nlayerUpsample, 0, (float)Math.sqrt(6f/nlayerUpsample.getFanIn() * 0.8f), random);
+        Randomiser.uniform(nlayerUpsample, 0, (float)Math.sqrt(6f/nlayerUpsample.getFanIn()), random);
         network.addLayer(nlayerUpsample);
         alayer = new LeakyReLULayer(0.2f);
         network.addLayer(alayer);
@@ -275,7 +264,8 @@ public class UConvNN {
                 ImageIO.write(image, "png", new File(i + "resid.png"));
             }
             
-            sgd.update(network, 1, 0.1f, 0.9f, 1e-5f, 0.001f);
+            //sgd.update(network, 1, 1f, 0.9f, 1e-5f, 0.001f, 0.001f);
+            sgd.update(network, 1, 0.1f, 0.9f, 1e-3f, 0.001f, 0.01f);
             
             
             

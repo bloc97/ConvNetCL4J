@@ -5,6 +5,7 @@
  */
 package nn.elementwise.activation;
 
+import nn.Layer;
 import nn.elementwise.activation.kernels.LeakyReLUForwardKernel;
 import nn.elementwise.activation.kernels.LeakyReLUBackwardKernel;
 /**

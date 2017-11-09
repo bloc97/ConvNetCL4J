@@ -15,4 +15,5 @@ public interface Layer extends Bidirectional {
     
     public int[] getInputSize();
     public int[] getOutputSize();
+    
 }

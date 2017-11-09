@@ -16,6 +16,15 @@ import javax.imageio.ImageIO;
  */
 public class Utils {
     
+    
+    public static void writeImage(BufferedImage imageBuffer, String path) throws IOException {
+        ImageIO.write(imageBuffer, "png", new File(path));
+    }
+    
+    public static BufferedImage readImage(String path) throws IOException {
+        return ImageIO.read(new File(path));
+    }
+    
     public static float clamp(float value, float a, float b) {
         float min = Math.min(a, b);
         float max = Math.max(a, b);

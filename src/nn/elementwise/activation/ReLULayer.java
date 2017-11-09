@@ -5,6 +5,7 @@
  */
 package nn.elementwise.activation;
 
+import nn.Layer;
 import nn.elementwise.activation.kernels.ReLUBackwardKernel;
 import nn.elementwise.activation.kernels.ReLUForwardKernel;
 

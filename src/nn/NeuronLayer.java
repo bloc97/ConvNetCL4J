@@ -29,4 +29,6 @@ public interface NeuronLayer extends Layer, Gradable {
     public int getFanIn();
     public int getFanOut();
     
+    public Layer createSharedClone();
+    
 }

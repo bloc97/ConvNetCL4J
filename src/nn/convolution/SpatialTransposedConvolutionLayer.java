@@ -81,6 +81,16 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
         padding[1] = pvert;
     }
     
+    private SpatialTransposedConvolutionLayer(float[] weights, int[] kernelSize, int[] stride, int[] padding) {
+        this(kernelSize[0], kernelSize[1], kernelSize[2], kernelSize[3], stride[0], stride[1], padding[0], padding[1]);
+        this.weights = weights;
+    }
+    
+    
+    public NeuronLayer createSharedClone() {
+        return new SpatialTransposedConvolutionLayer(weights, kernelSize, stride, padding);
+    }
+    
     @Override
     public void setInputSize(int[] size) {
         if (size.length != 3) {

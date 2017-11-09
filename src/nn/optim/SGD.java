@@ -32,7 +32,6 @@ public class SGD {
                 if (!nlayer.isGradientZero()) {
                     KERNEL.call(nlayer.getWeights(), nlayer.getGradients(), batchSize, learningRate, clip);
                     nlayer.resetGradients();
-                    System.out.print("SGD | ");
                 }
                 
             }

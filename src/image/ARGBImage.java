@@ -26,8 +26,8 @@ public class ARGBImage {
     
     private final float min, max, range;
     
-    public ARGBImage(File image, float darkestValue, float brightestValue) throws IOException {
-        imageBuffer = ImageIO.read(image);
+    public ARGBImage(BufferedImage image, float darkestValue, float brightestValue) {
+        imageBuffer = image;
         min = darkestValue;
         max = brightestValue;
         range = max - min;
@@ -148,8 +148,8 @@ public class ARGBImage {
         return hasAlpha;
     }
     
-    public float[] getImageSize(boolean useAlpha) {
-        return new float[] {w, h, (useAlpha) ? 4 : 3};
+    public int[] getImageSize(boolean useAlpha) {
+        return new int[] {w, h, (useAlpha) ? 4 : 3};
     }
 
     public BufferedImage getBuffer() {

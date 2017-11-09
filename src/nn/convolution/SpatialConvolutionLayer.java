@@ -77,6 +77,15 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         padding[1] = pvert;
     }
     
+    private SpatialConvolutionLayer(float[] weights, int[] kernelSize, int[] stride, int[] padding) {
+        this(kernelSize[0], kernelSize[1], kernelSize[2], kernelSize[3], stride[0], stride[1], padding[0], padding[1]);
+        this.weights = weights;
+    }
+    
+    public NeuronLayer createSharedClone() {
+        return new SpatialConvolutionLayer(weights, kernelSize, stride, padding);
+    }
+    
     @Override
     public void setInputSize(int[] size) {
         if (size.length != 3) {

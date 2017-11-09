@@ -28,8 +28,18 @@ public class SkipConnectionEntry implements Layer {
     
     
     
-    private final List<SkipConnectionExit> exits = new LinkedList<>();
-    private double[] skipError = new double[0];
+    private final List<SkipConnectionExit> exits;
+    private double[] skipError;
+    
+    public SkipConnectionEntry() {
+        exits = new LinkedList<>();
+        skipError = new double[0];
+    }
+    
+    private SkipConnectionEntry(List<SkipConnectionExit> exits) {
+        this.exits = exits;
+        this.skipError = new double[0];
+    }
     
     public SkipConnectionExit createExit() {
         SkipConnectionExit newExit = new SkipConnectionExit(this);
@@ -98,7 +108,7 @@ public class SkipConnectionEntry implements Layer {
     public int[] getOutputSize() {
         return inputSize;
     }
-
+    
     public static class SkipConnectionExit implements Layer {
         
         private final SkipConnectionEntry entry;

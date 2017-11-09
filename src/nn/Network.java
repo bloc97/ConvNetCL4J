@@ -114,4 +114,5 @@ public class Network implements Layer, Gradable {
             return layers.get(layers.size() - 1).getOutputSize();
         }
     }
+    
 }
