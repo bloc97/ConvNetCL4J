@@ -194,6 +194,8 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
 
     @Override
     public void grad() {
+        GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, outputError, outputSize, outputDim, input, inputSize, inputDim);
+        /*
         long startTime = System.currentTimeMillis();
         int size = inputCheckpoints.size();
         
@@ -209,7 +211,7 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
         errorCheckpoints.clear();
         long endTime = System.currentTimeMillis();
         //System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
-        
+        */
         isGradientZero = false;
     }
 

@@ -167,7 +167,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         }
         this.input = input;
         
-        inputCheckpoints.add(new Checkpoint(input));
+        //inputCheckpoints.add(new Checkpoint(input));
         
         FORWARDKERNEL.call(weights, kernelSize, kernelDim, stride, padding, input, inputSize, inputDim, output, outputSize, outputDim);
         
@@ -181,7 +181,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         }
         this.outputError = outputError;
         
-        errorCheckpoints.addFirst(new Checkpoint(outputError));
+        //errorCheckpoints.addFirst(new Checkpoint(outputError));
         
         BACKWARDKERNEL.call(weights, kernelSize, kernelDim, stride, padding, outputError, outputSize, outputDim, inputError, inputSize, inputDim);
         
@@ -190,6 +190,9 @@ public class SpatialConvolutionLayer implements NeuronLayer {
 
     @Override
     public void grad() {
+        
+        GRADKERNEL.call(weights, gradients, kernelSize, kernelDim, stride, padding, input, inputSize, inputDim, outputError, outputSize, outputDim);
+        /*
         long startTime = System.currentTimeMillis();
         int size = inputCheckpoints.size();
         
@@ -205,6 +208,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         if (size > 0) {
             //System.out.print("Grad " + size + " " + (endTime-startTime) + " ms | ");
         }
+        */
         isGradientZero = false;
     }
 
