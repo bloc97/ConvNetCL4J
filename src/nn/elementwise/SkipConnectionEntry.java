@@ -60,7 +60,7 @@ public class SkipConnectionEntry implements Layer {
         
         this.input = input;
         this.output = input;//Arrays.copyOf(input, inputLength);
-        
+        this.skipError = new float[inputLength];
         for (SkipConnectionExit exit : exits) {
             exit.setSkipInput(this.output);
         }
@@ -75,7 +75,7 @@ public class SkipConnectionEntry implements Layer {
         }
         
         this.outputError = outputError;
-        
+        inputError = new float[inputLength];
         ADDKERNEL.call(inputError, outputError, skipError);
         
         return this.inputError;
