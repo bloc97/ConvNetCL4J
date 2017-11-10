@@ -29,7 +29,7 @@ public class ForwardSpatialConvolutionKernel extends Kernel { //Sums the result 
     private float[] output = new float[0];
     private int[] outputSize = new int[4];
     private int[] outputDim = new int[4];
-    
+
     public void call(float[] weights, int[] kernelSize, int[] kernelDim, int[] stride, int padding[], float[] input, int[] inputSize, int[] inputDim, float[] output, int[] outputSize, int[] outputDim) {
         this.weights = weights;
         this.kernelSize = kernelSize;

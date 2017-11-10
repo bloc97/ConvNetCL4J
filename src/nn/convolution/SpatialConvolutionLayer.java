@@ -69,6 +69,7 @@ public class SpatialConvolutionLayer implements NeuronLayer {
         this.weights = weights;
     }
     
+    @Override
     public NeuronLayer createSharedClone() {
         return new SpatialConvolutionLayer(weights, kernelSize, stride, padding);
     }

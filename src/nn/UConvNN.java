@@ -10,22 +10,20 @@ import nn.loss.LossFunction;
 import nn.convolution.SpatialConvolutionLayer;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
+import image.ARGBImage;
+import image.Utils;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
 import javax.imageio.ImageIO;
-import nn.convolution.SpatialTransposedConvolutionLayer;
-import nn.elementwise.NearestNeighbour2D;
 import nn.elementwise.SkipConnectionEntry;
-import nn.elementwise.activation.LeakyReLULayer;
 import nn.elementwise.activation.ReLULayer;
 import nn.loss.CharbonnierErrorLossFunction;
 import nn.optim.SGD;
 import nn.optim.SGDMomentum;
+import other.Dcci;
 import other.Scalr;
 
 /**
@@ -135,12 +133,36 @@ public class UConvNN {
         BufferedImage other = ImageIO.read(new File("girl50.png"));
         BufferedImage otherHr = ImageIO.read(new File("girl100.png"));
         
+        
         int[] inputInt = small.getRGB(0, 0, 50, 50, new int[50*50*3], 0, 50);
         int[] expectedLrInt = lr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
         int[] expectedOutputInt = hr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
         
         int[] otherInt = other.getRGB(0, 0, 50, 50, new int[50*50*3], 0, 50);
         int[] otherHrInt = otherHr.getRGB(0, 0, 100, 100, new int[100*100*3], 0, 100);
+        
+        BufferedImage full = ImageIO.read(new File("full.png"));
+        BufferedImage fulld2 = Scalr.resize(full, Scalr.Method.SPEED, Scalr.Mode.FIT_TO_WIDTH, full.getWidth()/2);
+        //BufferedImage fullLr = Scalr.resize(fulld2, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_TO_WIDTH, full.getWidth());
+        BufferedImage fullLr = Dcci.scale(fulld2);
+        
+        Utils.writeImage(fullLr, "fullLr.png");
+        
+        ARGBImage fullImage = new ARGBImage(full, -1, 1);
+        ARGBImage fullLrImage = new ARGBImage(fullLr, -1, 1);
+        
+        float[] fullFloat = fullImage.getFloatExpanded(false);
+        float[] fullLrFloat = fullLrImage.getFloatExpanded(false);
+        float[] img = new float[fullFloat.length];
+        
+        for (int i=0; i<img.length; i++) {
+            img[i] = fullFloat[i] - fullLrFloat[i];
+        }
+        
+        ARGBImage fullResidual = new ARGBImage(img, fullImage.getImageSize(false), -1, 1);
+        
+        Utils.writeImage(fullResidual.getBuffer(), "full_resid.png");
+        
         
         //Color c = new Color(expectedOutputInt[100*100]);
         

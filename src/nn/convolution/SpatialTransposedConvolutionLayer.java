@@ -74,6 +74,7 @@ public class SpatialTransposedConvolutionLayer implements NeuronLayer {
     }
     
     
+    @Override
     public NeuronLayer createSharedClone() {
         return new SpatialTransposedConvolutionLayer(weights, kernelSize, stride, padding);
     }

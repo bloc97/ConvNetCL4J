@@ -30,8 +30,7 @@ public class GradSpatialConvolutionKernel extends Kernel {
     private float[] outputError = new float[0];
     private int[] outputErrorSize = new int[4];
     private int[] outputErrorDim = new int[4]; //Width, Width * Height, Total Length
-    
-    
+
     public void call(float[] weights, float[] gradients, int[] kernelSize, int[] kernelDim, int[] stride, int padding[], float[] input, int[] inputSize, int[] inputDim, float[] outputError, int[] outputErrorSize, int[] outputErrorDim) {
         this.weights = weights;
         this.gradients = gradients;

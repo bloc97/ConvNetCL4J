@@ -29,8 +29,7 @@ public class BackwardSpatialConvolutionKernel extends Kernel {
     private float[] inputError = new float[0];
     private int inputErrorSize[] = new int[4];
     private int inputErrorDim[] = new int[4];
-    
-    
+
     public void call(float[] weights, int[] kernelSize, int[] kernelDim, int[] stride, int padding[], float[] outputError, int[] outputErrorSize, int[] outputErrorDim, float[] inputError, int[] inputErrorSize, int[] inputErrorDim) {
         this.weights = weights;
         this.kernelSize = kernelSize;

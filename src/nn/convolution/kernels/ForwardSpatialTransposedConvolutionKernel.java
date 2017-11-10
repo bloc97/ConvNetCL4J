@@ -29,8 +29,7 @@ public class ForwardSpatialTransposedConvolutionKernel extends Kernel {
     private float[] inputError = new float[0];
     private int inputErrorSize[] = new int[4]; //Width, Height, Depth
     private int inputErrorDim[] = new int[4]; //Width, Width * Height, Total Length
-    
-    
+
     public void call(float[] weights, int[] kernelSize, int[] kernelDim, int[] stride, int padding[], float[] outputError, int[] outputErrorSize, int[] outputErrorDim, float[] inputError, int[] inputErrorSize, int[] inputErrorDim) {
         this.weights = weights;
         this.kernelSize = kernelSize;
