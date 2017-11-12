@@ -23,23 +23,23 @@ public class SpatialConvolutionLayer implements NeuronLayer {
     public final static BackwardSpatialConvolutionKernel BACKWARDKERNEL = new BackwardSpatialConvolutionKernel();
     public final static GradSpatialConvolutionKernel GRADKERNEL = new GradSpatialConvolutionKernel();
     
-    private float[] weights = new float[0];
-    private float[] gradients = new float[0];
-    private final int[] kernelSize = new int[4]; //Width, Height, Depth, Number
-    private final int[] kernelDim = new int[4]; //Width, Width * Height, Width * Height * Depth, Total Length
+    protected float[] weights = new float[0];
+    protected float[] gradients = new float[0];
+    protected final int[] kernelSize = new int[4]; //Width, Height, Depth, Number
+    protected final int[] kernelDim = new int[4]; //Width, Width * Height, Width * Height * Depth, Total Length
     
-    private final int[] stride = new int[2]; //Stride: Horizontal, Vertical
-    private final int[] padding = new int[2]; //Padding: Horizontal, Vertical
+    protected final int[] stride = new int[2]; //Stride: Horizontal, Vertical
+    protected final int[] padding = new int[2]; //Padding: Horizontal, Vertical
     
-    private float[] input = new float[0];
-    private float[] inputError = new float[0];
-    private final int[] inputSize = new int[4]; //Width, Height, Depth, N
-    private final int[] inputDim = new int[4]; //Width, Width * Height, Length, Total Length
+    protected float[] input = new float[0];
+    protected float[] inputError = new float[0];
+    protected final int[] inputSize = new int[4]; //Width, Height, Depth, N
+    protected final int[] inputDim = new int[4]; //Width, Width * Height, Length, Total Length
     
-    private float[] output = new float[0];
-    private float[] outputError = new float[0];
-    private final int[] outputSize = new int[4];
-    private final int[] outputDim = new int[4];
+    protected float[] output = new float[0];
+    protected float[] outputError = new float[0];
+    protected final int[] outputSize = new int[4];
+    protected final int[] outputDim = new int[4];
     
     private boolean isGradientEmpty = true;
     

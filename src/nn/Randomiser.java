@@ -39,12 +39,12 @@ public abstract class Randomiser {
         normal(layer, mean, multiplier, random);
     }
     
-    public static void kaimingUniform(NeuronLayer layer) {
+    public static void kaimingUniform(NeuronLayer layer, float multiplier) {
         Random random = new Random();
-        kaimingUniform(layer, random);
+        kaimingUniform(layer, multiplier, random);
     }
-    public static void kaimingUniform(NeuronLayer layer, Random random) {
-        uniform(layer, 0, (float)Math.sqrt(6f/layer.getFanIn()), random);
+    public static void kaimingUniform(NeuronLayer layer, float multiplier, Random random) {
+        uniform(layer, 0, (float)Math.sqrt(multiplier * 6f/layer.getFanIn()), random);
     }
     
 }
