@@ -12,6 +12,11 @@ SGD-Momentum
 MSE Loss  
 Charbonnier Loss  
 
+
+*High priority:*  
+Add gradient checks and unit tests
+
+
 Near future plans:  
 Other Rectifiers (ELU, etc)  
 Max Pooling Layer  
