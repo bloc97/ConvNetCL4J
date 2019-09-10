@@ -3,6 +3,9 @@ OpenCL Accelerated Deep Learning for Java using Aparapi
 
 This is still WIP.  
 
+# Developement has stopped due to better alternatives such as
+## Google Colab, Kaggle Kernels
+
 Currently done:  
 Convolutional Layer  
 Transpose Convolution Layer  
